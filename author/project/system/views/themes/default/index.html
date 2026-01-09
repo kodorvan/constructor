@@ -1,0 +1,31 @@
+{% extends "/themes/default/core.html" %}
+
+{% use "/themes/default/header.html" with css as header_css, body as header, js as header_js %}
+{% use "/themes/default/aside.html" with css as aside_css, body as aside, js as aside_js %}
+{% use "/themes/default/footer.html" with css as footer_css, body as footer, js as footer_js %}
+
+{% block css %}
+        {{ block('header_css') }}
+        {{ block('aside_css') }}
+        {{ block('footer_css') }}
+{% endblock %}
+
+{% block body %}
+        {{ block('header') }}
+
+        {{ block('aside') }}
+
+        <main>
+                {% block main %}
+                {{ main|raw }}
+                {% endblock %}
+        </main>
+
+        {{ block('footer') }}
+{% endblock %}
+
+{% block js %}
+        {{ block('header_js') }}
+        {{ block('aside_js') }}
+        {{ block('footer_js') }}
+{% endblock %}

@@ -1,0 +1,57 @@
+{
+	"name": "kodorvan/constructor",
+	"description": "Telegram funnel constructor",
+	"homepage": "https://git.svoboda.works/kodorvan/constructor",
+	"type": "site",
+	"keywords": [
+		"minimal",
+		"baza"
+	],
+	"readme": "README.md",
+	"license": "WTFPL",
+	"authors": [
+		{
+			"name": "kodorvan",
+			"email": "kodorvan@gmail.com",
+			"homepage": "https://kodorvan.page",
+			"role": "Programmer"
+		}
+	],
+	"support": {
+		"wiki": "https://git.svoboda.works/kodorvan/constructor/wiki",
+		"issues": "https://git.svoboda.works/kodorvan/constructor/issues"
+	},
+	"require": {
+		"php": "^8.5",
+		"mirzaev/minimal": "^3.7",
+		"mirzaev/baza": "^3.3",		
+		"mirzaev/record": "^1.0",
+		"mirzaev/languages": "^1.0",
+		"mirzaev/currencies": "^2.0",
+		"mirzaev/unmarkdown": "^1.0",
+		"svoboda/time": "^1.0",
+		"badfarm/zanzara": "^0.9.1",
+		"twig/twig": "^3.2",
+		"twig/extra-bundle": "^3.7",
+		"twig/intl-extra": "^3.10",
+		"react/filesystem": "^0.1.2"
+	},
+	"suggest": {
+		"mirzaev/files": "Easy working with files",
+		"mirzaev/currencies": "Easy currencies integration"
+
+	},
+	"autoload": {
+		"psr-4": {
+			"kodorvan\\constructor\\": "kodorvan/constructor/system"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"kodorvan\\constructor\\tests\\": "kodorvan/constructor/tests"
+		}
+	},
+	"scripts": {
+		"pre-update-cmd": "./install.sh"
+	}
+}

@@ -1,0 +1,15 @@
+<?php
+
+// The library for languages support
+use mirzaev\languages\language;
+
+// Initializing dependencies
+require ROOT . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+
+define('PROJECT_NAME', '');
+define('PROJECT_DOMAIN', '');
+
+defing('LANGUAGE_DEFAULT', language::en);
+
+// Initializing default theme for the views templater
+define('THEME', 'default');

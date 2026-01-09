@@ -1,0 +1,9 @@
+@import url('/css/fonts/fira.css');
+@import url('/css/fonts/hack.css');
+@import url('/css/fonts/dejavu.css');
+
+@font-face {
+  font-family: 'Commissioner';
+  src: url('/fonts/commissioner.ttf');
+  font-weight: 400;
+}

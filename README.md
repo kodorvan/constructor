@@ -1,0 +1,2 @@
+# constructor
+Telegram funnel constructor

@@ -1,0 +1,45 @@
+@charset "UTF-8";
+
+@media (prefers-color-scheme: dark) {
+        :root {
+                --text-color: #fff;
+                --text-color-inverted: #000;
+                --button-background-color-inverted: #fff;
+                --button-background-color: #000;
+                --section-background-color-inverted: #fff;
+                --section-background-color: #000;
+                --background-color: #000;
+                --background-color-inverted: #fff;
+
+                --interface-top-background-color: var(--background-color, #000);
+                --interface-background-color: var(--background-color, #000);
+                --interface-bottom-background-color: var(--background-color, #000);
+
+                --red: red;
+                --white: #fff;
+
+                --paper: var(--white);
+        }
+}
+
+@media (prefers-color-scheme: light) {
+        :root {
+                --text-color: #fff;
+                --text-color-inverted: #000;
+                --button-background-color-inverted: #fff;
+                --button-background-color: #000;
+                --section-background-color-inverted: #fff;
+                --section-background-color: #000;
+                --background-color: #000;
+                --background-color-inverted: #fff;
+
+                --interface-top-background-color: var(--background-color, #000);
+                --interface-background-color: var(--background-color, #000);
+                --interface-bottom-background-color: var(--background-color, #000);
+
+                --red: red;
+                --white: #fff;
+
+                --paper: var(--white);
+        }
+}

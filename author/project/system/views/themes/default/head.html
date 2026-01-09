@@ -1,0 +1,26 @@
+{% block title %}
+<title>{% if head.title != empty %}{{ head.title }}{% else %}constructor by kodorvan{% endif %}</title>
+{% endblock %}
+
+{% block meta %}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+{% for meta in head.metas %}
+<meta {% for name, value in meta.attributes %}{{ name }}="{{ value }}" {% endfor %}>
+{% endfor %}
+{% endblock %}
+
+{% block css %}
+{% for element in css %}
+<link type="text/css" rel="stylesheet"{% if element.href %} href="{{ element.href }}"{% endif %} />
+{% endfor %}
+<link type="text/css" rel="stylesheet" href="/themes/default/css/fonts.css" />
+<link type="text/css" rel="stylesheet" href="/themes/default/css/system.css" />
+<link type="text/css" rel="stylesheet" href="/themes/default/css/header.css" />
+<link type="text/css" rel="stylesheet" href="/themes/default/css/main.css" />
+<link type="text/css" rel="stylesheet" href="/themes/default/css/aside.css" />
+<link type="text/css" rel="stylesheet" href="/themes/default/css/footer.css" />
+<style id="theme">
+    @import url('/themes/default/css/themes/default/colorscheme.css');
+</style>
+{% endblock %}

@@ -1,0 +1,7 @@
+<?php
+
+// Robot
+define('ROBOT', [
+	'identifier' => null,
+	'key' => ''
+]);

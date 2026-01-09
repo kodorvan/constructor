@@ -1,0 +1,14 @@
+@charset "UTF-8";
+
+body {
+	margin: unset;
+}
+
+main {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--gap);
+	transition: 0s;
+}
