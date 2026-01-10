@@ -7,7 +7,8 @@ namespace kodorvan\constructor\models;
 // Files of the project
 use kodorvan\constructor\models\core,
 	kodorvan\constructor\models\authorizations,
-	kodorvan\constructor\models\settings;
+	kodorvan\constructor\models\settings,
+	kodorvan\constructor\models\projects;
 
 // The library for languages support
 use mirzaev\languages\language;
@@ -363,5 +364,22 @@ final class account extends core implements record_interface
 		// Exit (fail)
 		return null;
 	}
-}
 
+	/**
+	 * Projects
+	 *
+	 * Search for the account projects
+	 *
+	 * @param int $amount Maximum amount
+	 *
+	 * @return array The account projects
+	 */
+	public function projects(int $amount = 20): array
+	{
+		// Search for the account projects 
+		$projects = new project()->database->read(filter: fn(record $record) => $record->active === 1 && $record->account === $this->identifier, amount: $amount);
+
+		// Exit (success/fail)
+		return $projects;
+	}
+}

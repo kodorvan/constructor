@@ -34,7 +34,8 @@
 		"twig/twig": "^3.2",
 		"twig/extra-bundle": "^3.7",
 		"twig/intl-extra": "^3.10",
-		"react/filesystem": "^0.1.2"
+		"react/filesystem": "^0.1.2",
+		"nyholm/psr7": "^1.8"
 	},
 	"suggest": {
 		"mirzaev/files": "Easy working with files",
@@ -53,5 +54,11 @@
 	},
 	"scripts": {
 		"pre-update-cmd": "./install.sh"
+	},
+	"config": {
+		"allow-plugins": {
+			"php-http/discovery": true,
+			"wyrihaximus/composer-update-bin-autoload-path": true
+		}
 	}
 }

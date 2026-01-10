@@ -76,7 +76,11 @@ $robot->middleware([middlewares::class, 'authorizations']);
 
 // Initializing the robot commands handlers
 $robot->onCommand('start', [commands::class, 'start']);
-$robot->onCommand('menu', [commands::class, 'menu']);
+
+$robot->onCommand('start telegram voronka', [commands::class, 'start']);
+$robot->onCommand('start parser', [commands::class, 'start']);
+$robot->onCommand('start calculator', [commands::class, 'start']);
+
 $robot->onCommand('language', [commands::class, 'language'])->middleware([middlewares::class, 'settings']);
 $robot->onCommand('society', [commands::class, 'society']);
 

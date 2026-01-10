@@ -9,7 +9,7 @@ require ROOT . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 define('PROJECT_NAME', '');
 define('PROJECT_DOMAIN', '');
 
-defing('LANGUAGE_DEFAULT', language::en);
+define('LANGUAGE_DEFAULT', language::en);
 
 // Initializing default theme for the views templater
 define('THEME', 'default');

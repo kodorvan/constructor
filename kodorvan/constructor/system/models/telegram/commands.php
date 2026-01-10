@@ -42,20 +42,6 @@ final class commands extends core
 	 */
 	public static function start(context $context): void
 	{
-		static::menu($context);
-	}
-
-	/**
-	 * Menu
-	 *
-	 * Responce for command: '/menu'
-	 *
-	 * @param context $context Request data from Telegram
-	 *
-	 * @return void
-	 */
-	public static function menu(context $context): void
-	{
 		// Initializing the account
 		$account = $context->get('account');
 
@@ -74,23 +60,55 @@ final class commands extends core
 				if ($localization) {
 					// Initialized localization
 
-					// Initializing the title
+					// Initializing the message title text
 					$title = '📋 *' . $localization['menu_title'] . '*';
-	
+
+					// Initializing the keyboard array
+					/* $keyboard = [];
+
+					foreach (project) */
+
+					// Calculating amount of projects
+					$projects = count($account->projects());
+
+					// Initializing the message description text
+					$description = $projects > 0 ? $localization['menu_description_partner'] : ('🔥 ' . $localization['menu_description_guest']);
+
+					// Initializing the message experiment text
+					$experiment = '⚠️ ' . $localization['menu_experiment'];
+
+					// Initializing the message last update text
+					exec(command: 'git log --oneline $(git describe --tags --abbrev=0 @^)..@ -1 --format="%at" | xargs -I{} date -d @{} "+%Y.%m.%d %H:%M"', output: $git);
+					$update = empty($git) ? '' : "\n*" . $localization['menu_update'] . ':* ' . $git;
+
 					// Sending the message
 					$context->sendMessage(
 						<<<TXT
 						$title
+
+						$description
+
+						$experiment$update
 						TXT,
 						[
 							'reply_markup' => [
 								'inline_keyboard' => [
-									/* [
+									[
 										[
-											'text' => '⚙️ ' . $localization[''],
-											'callback_data' => ''
+											'text' => '📂 ' . $localization['menu_button_project_new'],
+											'callback_data' => 'calculator'
+										],
+										[
+											'text' => '🗂 ' . $localization['menu_button_projects'] . ': ' . $projects,
+											'callback_data' => 'projects'
 										]
-									] */
+									],
+									[
+										[
+											'text' => '📡 ' . $localization['menu_button_operator'],
+											'callback_data' => 'operator'
+										]
+									]
 								],
 								'disable_notification' => true,
 								'remove_keyboard' => true
@@ -353,4 +371,3 @@ final class commands extends core
 		}
 	}
 }
-
