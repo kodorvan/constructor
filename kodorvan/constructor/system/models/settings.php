@@ -83,12 +83,12 @@ final class settings extends core implements record_interface
 	 * @param int $account The account identifier
 	 * @param int $active Is the record active?
 	 *
-	 * @return int|false The record identifier, if created
+	 * @return int|false The record, if created
 	 */
 	public function write(
 		int $account,
 		bool $active = true,
-	): int|false {
+	): record|false {
 		$record = $this->database->record(
 			$this->database->count() + 1,
 			$account,
@@ -101,7 +101,7 @@ final class settings extends core implements record_interface
 		$created = $this->database->write($record);
 
 		// Exit (success)
-		return $created ? $record->identifier : false;
+		return $created ? $record : false;
 	}
 
 	/**
@@ -132,4 +132,3 @@ final class settings extends core implements record_interface
 		return $this;
 	}
 }
-

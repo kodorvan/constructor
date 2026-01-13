@@ -9,6 +9,7 @@ return [
 
 	// Main menu
 	'menu_title' => 'Main menu',
+	'menu_update' => 'Last update',
 
 	// Account
 	'account_title' => 'Account',

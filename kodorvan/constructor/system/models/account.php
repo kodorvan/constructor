@@ -8,7 +8,9 @@ namespace kodorvan\constructor\models;
 use kodorvan\constructor\models\core,
 	kodorvan\constructor\models\authorizations,
 	kodorvan\constructor\models\settings,
-	kodorvan\constructor\models\projects;
+	kodorvan\constructor\models\project,
+	kodorvan\constructor\models\project\enumerations\type as project_type,
+	kodorvan\constructor\models\project\enumerations\status as project_status;
 
 // The library for languages support
 use mirzaev\languages\language;
@@ -229,11 +231,11 @@ final class account extends core implements record_interface
 			$settings->write(account: $record->identifier);
 
 			// Writing the record into the database
-			$record = $this->database->read(
+			/* $record = $this->database->read(
 				filter: fn(record $_record) => $_record->identifier === $record->identifier,
 				update: fn(record &$_record) => $_record = $record,
 				amount: 1
-			)[0] ?? null;
+			)[0] ?? null; */
 
 			// Exit (success)
 			return $record;
@@ -370,14 +372,26 @@ final class account extends core implements record_interface
 	 *
 	 * Search for the account projects
 	 *
+	 * @param project_type|null $type Type of the project
+	 * @param project_status|null $status Status of the project
 	 * @param int $amount Maximum amount
 	 *
 	 * @return array The account projects
 	 */
-	public function projects(int $amount = 20): array
-	{
+	public function projects(
+		?project_type $type = null,
+		?project_status $status = null,
+		int $amount = 20
+	): array {
 		// Search for the account projects 
-		$projects = new project()->database->read(filter: fn(record $record) => $record->active === 1 && $record->account === $this->identifier, amount: $amount);
+		$projects = new project()->database->read(
+			filter: fn(record $record) =>
+			$record->active === 1
+				&& $record->account === $this->identifier
+				&& ($type === null || $record->type === $type->name)
+				&& ($status === null || $record->status === $status->name),
+			amount: $amount
+		);
 
 		// Exit (success/fail)
 		return $projects;

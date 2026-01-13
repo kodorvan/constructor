@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace kodorvan\constructor\models;
 
 // Files of the project
-use kodorvan\constructor\models\core;
+use kodorvan\constructor\models\core,
+	kodorvan\constructor\models\project\enumerations\status as project_status,
+	kodorvan\constructor\models\project\enumerations\status as project_type;
 
 // Baza database
 use mirzaev\baza\database,
@@ -66,6 +68,8 @@ final class project extends core implements record_interface
 			->columns(
 				new column('identifier', type::long_long_unsigned),
 				new column('account', type::long_long_unsigned),
+				new column('status', type::string, ['length' => 16]),
+				new column('type', type::string, ['length' => 32]),
 				new column('name', type::string, ['length' => 64]),
 				/* new column('', type::), */
 				new column('active', type::char),
@@ -82,19 +86,32 @@ final class project extends core implements record_interface
 	 * Write
 	 *
 	 * @param int $account The account identifier
-	 * @param string $name Name of the project
+	 * @param project_status $status Status of the project
+	 * @param project_type $status Type of the project
+	 * @param string|null $name Name of the project
 	 * @param int $active Is the record active?
 	 *
-	 * @return int|false The record identifier, if created
+	 * @return record|false The record, if created
 	 */
 	public function write(
 		int $account,
-		string $name = '',
+		project_status $status = project_status::creating,
+		project_type $type = project_type::special,
+		?string $name = null,
 		bool $active = true,
-	): int|false {
+	): record|false {
+		if (empty($name)) {
+			// Not received the project name
+
+			// Generating the project name
+			$name = 'Project №' . count(new account()->read(filter: fn(record $record) => $record->active === 1 && $record->account === $account)?->projects() ?? []);
+		}
+
 		$record = $this->database->record(
 			$this->database->count() + 1,
 			$account,
+			$status->name,
+			$type->name,
 			$name,
 			(int) $active,
 			svoboda::timestamp(),
@@ -105,7 +122,7 @@ final class project extends core implements record_interface
 		$created = $this->database->write($record);
 
 		// Exit (success)
-		return $created ? $record->identifier : false;
+		return $created ? $record : false;
 	}
 
 	/**
@@ -115,8 +132,20 @@ final class project extends core implements record_interface
 	 */
 	public function serialize(): self
 	{
+		if ($this->serialized) {
+			// The record implementor is serialized
+
+			// Exit (fail)
+			throw new exception_runtime('The record implementor is already serialized');
+		}
+
 		// Serializing the record parameters
 		$this->record->active = (int) $this->record->active;
+		$this->record->status = $this->record->status->name;
+		$this->record->type = $this->record->type->name;
+
+		// Writing the status of serializing
+		$this->serialized = true;
 
 		// Exit (success)
 		return $this;
@@ -129,11 +158,52 @@ final class project extends core implements record_interface
 	 */
 	public function deserialize(): self
 	{
+		if (!$this->serialized) {
+			// The record implementor is deserialized
+
+			// Exit (fail)
+			throw new exception_runtime('The record implementor is already deserialized');
+		}
+
 		// Deserializing the record parameters
 		$this->record->active = (bool) $this->record->active;
+		$this->record->status = project_status::{$this->record->status};
+		$this->record->type = project_status::{$this->record->type};
+
+		// Writing the status of serializing
+		$this->serialized = false;
+
+		// Exit (success)
+		return $this;
+	}
+
+	/**
+	 * Parameters
+	 *
+	 * Search for all the project properties
+	 *
+	 * @return self The instance from which the method was called (fluent interface)
+	 */
+	public function parameters(): self
+	{
+		// Deserializing the record parameters
+		$this->record->active = (bool) $this->record->active;
+		$this->record->status = project_status::{$this->record->status};
+
+		if (!$this->serialized) {
+			// Not serialized
+		
+
+		} else {
+			// Serialized
+
+			// Exit (fail)
+			throw new exception('The project implementator is serialized');
+		}
+		/* if ($this->record->type === '') */
+
 
 		// Exit (success)
 		return $this;
 	}
 }
-

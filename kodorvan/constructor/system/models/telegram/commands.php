@@ -78,8 +78,8 @@ final class commands extends core
 					$experiment = '⚠️ ' . $localization['menu_experiment'];
 
 					// Initializing the message last update text
-					exec(command: 'git log --oneline $(git describe --tags --abbrev=0 @^)..@ -1 --format="%at" | xargs -I{} date -d @{} "+%Y.%m.%d %H:%M"', output: $git);
-					$update = empty($git) ? '' : "\n*" . $localization['menu_update'] . ':* ' . $git;
+					exec(command: 'git log --oneline $(git describe --tags --abbrev=0 @^ --always)..@ -1 --format="%at" | xargs -I{} date -d @{} "+%Y.%m.%d %H:%M"', output: $git);
+					$update = empty($git[0]) ? '' : "\n\n🔏 *" . $localization['menu_update'] . ':* ' . unmarkdown($git[0]);
 
 					// Sending the message
 					$context->sendMessage(
@@ -96,7 +96,7 @@ final class commands extends core
 									[
 										[
 											'text' => '📂 ' . $localization['menu_button_project_new'],
-											'callback_data' => 'calculator'
+											'callback_data' => 'project_create'
 										],
 										[
 											'text' => '🗂 ' . $localization['menu_button_projects'] . ': ' . $projects,

@@ -92,5 +92,7 @@ foreach (language::cases() as $language) {
 	$robot->onCbQueryData(["settings_language_$language->name"], fn(context $context) => settings::language($context, $language));
 };
 
+$robot->onCbQueryData('project_create', ['process_project_create', 'name']);
+
 // Starting chat-robot
 $robot->run();
