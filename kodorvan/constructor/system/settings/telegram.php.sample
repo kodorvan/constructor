@@ -1,7 +1,18 @@
 <?php
 
-// Robot
-define('ROBOT', [
-	'identifier' => null,
-	'key' => ''
-]);
+// Telegram API chat-robot
+return [
+	'constructor' => [
+		'identifier' => 0,
+		'domain' => '',
+		'key' => '',
+		'database' => [
+			'host'     => '/run/mysqld/mysqld.sock',
+			'port'     => 3306,
+			'user'     => '',
+			'password' => '',
+			'database' => '',
+		]
+	]
+];
+

@@ -26,7 +26,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1); */
 
 // Initializing path to the public directory 
-define('INDEX', __DIR__);
+define('INDEX', __DIR__ . DIRECTORY_SEPARATOR	. '..' . DIRECTORY_SEPARATOR	. '..');
 
 // Initializing path to the project root directory
 define('ROOT',  INDEX . DIRECTORY_SEPARATOR	. '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR	. '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR);
@@ -61,7 +61,7 @@ $settings = [
 		'constructor' => [
 			'token' => TELEGRAM['constructor']['key'],
 			'certificate_path' => PROJECT_CERTIFICATE,
-			'webhook_url' => 'https://' . PROJECT_DOMAIN . '/telegram/constructor.php',
+			'webhook_url' => 'https://' . PROJECT_DOMAIN . ':443/telegram/constructor.php',
 			'commands'    => [
 				start::class,
 			]
@@ -72,9 +72,9 @@ $settings = [
 ];
 
 // Initializing the robots manager
-$robot = new telegram($settings);
+$telegram = new telegram($settings);
 
-var_dump($telegram->bot('constructor')->getWebhookUpdate());
+var_dump($updates = $telegram->bot('constructor')->getWebhookUpdate());
 
 /* // Initializing the updates listener
 $robot->onUpdate(function (context $context): void {});

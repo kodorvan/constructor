@@ -35,7 +35,8 @@
 		"twig/extra-bundle": "^3.7",
 		"twig/intl-extra": "^3.10",
 		"react/filesystem": "^0.1.2",
-		"nyholm/psr7": "^1.8"
+		"nyholm/psr7": "^1.8",
+		"irazasyed/telegram-bot-sdk": "^3.15"
 	},
 	"suggest": {
 		"mirzaev/files": "Easy working with files",
