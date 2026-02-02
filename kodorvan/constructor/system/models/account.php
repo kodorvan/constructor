@@ -30,7 +30,7 @@ use mirzaev\record\interfaces\record as record_interface,
 use svoboda\time\statement as svoboda;
 
 // Framework for Telegram
-use Zanzara\Telegram\Type\User as telegram_user;
+use SergiX44\Nutgram\Telegram\Types\User\User as telegram_user;
 
 // Built-in libraries
 use Exception as exception,
@@ -51,7 +51,7 @@ final class account extends core implements record_interface
 	/**
 	 * File
 	 *
-	 * @var string $database Path to the database file
+	 * @var string $file Path to the database file
 	 */
 	protected string $file = DATABASES . DIRECTORY_SEPARATOR . 'accounts.baza';
 
@@ -107,26 +107,26 @@ final class account extends core implements record_interface
 	public function initialize(telegram_user $telegram): ?static
 	{
 		// Searching for the account in the database
-		$account = $this->database->read(filter: fn(record $record) => $record->identifier_telegram === $telegram->getId(), amount: 1)[0] ?? null;
+		$account = $this->database->read(filter: fn(record $record) => $record->identifier_telegram === $telegram->id, amount: 1)[0] ?? null;
 
 		if ($account instanceof record) {
 			// Found the account record
 
 			if (
-				$account->domain !== (string) $telegram->getUsername() ||
-				$account->name_first !== (string) $telegram->getFirstName() ||
-				$account->name_second !== (string) $telegram->getLastName()
+				$account->domain !== (string) $telegram->username ||
+				$account->name_first !== (string) $telegram->first_name ||
+				$account->name_second !== (string) $telegram->last_name
 			) {
 				// The telegram account was updated
 
 				// Updating the account in the database
 				$updated = $this->database->read(
-					filter: fn(record $record) => $record->identifier_telegram === $telegram->getId(),
+					filter: fn(record $record) => $record->identifier_telegram === $telegram->id,
 					update: function (record &$record) use ($telegram) {
 						// Writing new values into the record
-						$record->domain = (string) $telegram->getUsername();
-						$record->name_first = (string) $telegram->getFirstName();
-						$record->name_second = (string) $telegram->getLastName();
+						$record->domain = (string) $telegram->username;
+						$record->name_first = (string) $telegram->first_name;
+						$record->name_second = (string) $telegram->last_name;
 						$record->updated = svoboda::timestamp();
 					},
 					amount: 1
@@ -166,7 +166,7 @@ final class account extends core implements record_interface
 				// Registered the account
 
 				// Searching for the registered account in the database
-				$registered = $this->database->read(filter: fn(record $record) => $record->identifier_telegram === $telegram->getId(), amount: 1)[0] ?? null;
+				$registered = $this->database->read(filter: fn(record $record) => $record->identifier_telegram === $telegram->id, amount: 1)[0] ?? null;
 
 				if ($registered instanceof record) {
 					// Found the registered account
@@ -207,12 +207,12 @@ final class account extends core implements record_interface
 	{
 		// Creating the record
 		$record = $this->write(
-			telegram_identifier: (int) $telegram->getId(),
-			name_first: (string) $telegram->getFirstName(),
-			name_second: (string) $telegram->getLastName(),
-			domain: (string) $telegram->getUsername(),
-			language: (string) $telegram->getLanguageCode(),
-			robot: (bool) $telegram->isBot()
+			telegram_identifier: (int) $telegram->id,
+			name_first: (string) $telegram->first_name,
+			name_second: (string) $telegram->last_name,
+			domain: (string) $telegram->username,
+			language: (string) $telegram->language_code,
+			robot: (bool) $telegram->is_bot
 		);
 
 		if ($record instanceof record) {
@@ -395,5 +395,56 @@ final class account extends core implements record_interface
 
 		// Exit (success/fail)
 		return $projects;
+	}
+
+	/**
+	 * Partners
+	 *
+	 * Search for accounts that have at least one project in development
+	 *
+	 * @param int $amount Maximum amount
+	 *
+	 * @return array Partners accounts without duplicates
+	 */
+	public static function partners(int $amount = PHP_INT_MAX): array
+	{
+		try {
+			// Search for projects 
+			$projects = new project()->database->read(
+				filter: fn(record $record) =>
+				$record->active === 1
+					&& match (project_status::{$record->status}) {
+						project_status::developing, project_status::developed, project_status::launched => true,
+						default => false
+					},
+				amount: $amount
+			);
+
+			// Declaring the registry of partners accounts
+			$partners = [];
+
+			foreach ($projects as $project) {
+				// Iterating over projects
+
+				if (isset($partners[$project->account])) {
+					// The partner account is already was in the partners accounts registry
+
+					// Skipping the iteration
+					continue;
+				}
+
+				// Searching the partner account and writing into the partners accounts registry
+				$partners[$project->account] = new account()->read(filter: fn(record $record) => $record->identifier === $project->account);
+			}
+
+			// Exit (success)
+			return $partners;
+		} catch (exception $exception) {
+			// Writing the exception into the errors output buffer
+			error_log((string) $exception);
+		}
+
+		// Exit (fail)
+		return [];
 	}
 }

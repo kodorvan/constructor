@@ -21,9 +21,6 @@ use mirzaev\record\interfaces\record as record_interface,
 // Svoboda time
 use svoboda\time\statement as svoboda;
 
-// Framework for Telegram
-use Zanzara\Telegram\Type\User as telegram;
-
 // Built-in libraries
 use Exception as exception,
 	RuntimeException as exception_runtime;
@@ -43,7 +40,7 @@ final class authorizations extends core implements record_interface
 	/**
 	 * File
 	 *
-	 * @var string $database Path to the database file
+	 * @var string $file Path to the database file
 	 */
 	protected string $file = DATABASES . DIRECTORY_SEPARATOR . 'authorizations.baza';
 

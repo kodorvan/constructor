@@ -42,7 +42,7 @@ final class project extends core implements record_interface
 	/**
 	 * File
 	 *
-	 * @var string $database Path to the database file
+	 * @var string $file Path to the database file
 	 */
 	protected string $file = DATABASES . DIRECTORY_SEPARATOR . 'project.baza';
 

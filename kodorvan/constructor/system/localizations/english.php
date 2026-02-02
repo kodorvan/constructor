@@ -17,16 +17,12 @@ return [
 	'account_authorized_settings' => 'Access to settings',
 	'account_authorized_system_settings' => 'System access to the system settings',
 
-	// Language setting
-	'settings_select_language_title' => 'Select language',
-	'settings_select_language_description' => 'The selected language will be writed in your account settings',
-	'settings_language_update_success' => 'Language replaced:',
+	// Settings: language 
+	'settings_language_title' => 'Select language',
+	'settings_language_description' => 'The selected language will be used in the system interface generation',
+	'settings_language_update_success' => 'Language replaced',
 	'settings_language_update_fail' => 'Failed to replace language',
-
-	// Language selection
-	'select_language_title' => 'Select language',
-	'select_language_description' => 'The selected language will be used in the current process',
-	'select_language_button_add' => 'Add a language',
+	'settings_language_button_add' => 'Add a language',
 
 	// Authorization
 	'not_authorized_system' => 'You do not have access to the system',

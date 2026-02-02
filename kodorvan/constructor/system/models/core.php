@@ -41,4 +41,3 @@ class core extends model
 	{
 	}
 }
-

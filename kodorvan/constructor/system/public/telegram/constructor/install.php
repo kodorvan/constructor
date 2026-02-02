@@ -18,7 +18,10 @@ use mirzaev\minimal\core,
 	mirzaev\minimal\route;
 
 // Framework for Telegram
-use Telegram\Bot\BotsManager as telegram;
+/* use Telegram\Bot\BotsManager as telegram; */
+use SergiX44\Nutgram\Nutgram as telegram,
+	SergiX44\Nutgram\RunningMode\Webhook as webhook,
+	SergiX44\Nutgram\Telegram\Types\Internal\InputFile as input;
 
 // Enabling debugging
 /* ini_set('error_reporting', E_ALL);
@@ -55,7 +58,19 @@ define('TELEGRAM', require(SETTINGS . DIRECTORY_SEPARATOR . 'telegram.php'));
 // Initializing dependencies
 require ROOT . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
-// Initializing the robots manager settings
+// Initializing the robot
+$robot = new telegram(TELEGRAM['constructor']['key']);
+
+$robot->setWebhook(
+	url: 'https://' . PROJECT_DOMAIN . '/telegram/constructor/webhook.php',
+	certificate: new input(resource: PROJECT_CERTIFICATE),
+	ip_address: SERVER_IP_ADDRESS,
+	max_connections: 10,
+	drop_pending_updates: false,
+	secret_token: 'bebra228'
+);
+
+/* // Initializing the robots manager settings
 $settings = [
 	'bots' => [
 		'constructor' => [
@@ -78,6 +93,8 @@ $updates = $telegram->bot('constructor')->setWebhook([
 	'url' => 'https://' . PROJECT_DOMAIN . '/telegram/constructor/webhook.php',
 	'certificate' => PROJECT_CERTIFICATE
 ]);
+ */
+
 
 /* // Initializing the updates listener
 $robot->onUpdate(function (context $context): void {});

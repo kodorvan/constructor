@@ -6,8 +6,16 @@ use mirzaev\languages\language;
 // Initializing dependencies
 require ROOT . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
-define('PROJECT_NAME', '');
-define('PROJECT_DOMAIN', '');
+define('SERVER_IP_ADDRESS', '5.140.110.25');
+
+define('PROJECT_CREATOR', 'kodorvan');
+define('PROJECT_NAME', 'constructor');
+define('PROJECT_DOMAIN', 'constructor.kodorvan.tech');
+define('PROJECT_CERTIFICATE', SETTINGS . DIRECTORY_SEPARATOR . 'certificate' . DIRECTORY_SEPARATOR . 'public.pem');
+define('REPOSITORY', 'https://git.svoboda.works');
+define('PROJECT_REPOSITORY', REPOSITORY . '/' . PROJECT_CREATOR . '/' . PROJECT_NAME);
+define('PROJECT_REPOSITORY_LANGUAGE_ADD',  PROJECT_REPOSITORY . '/src/branch/stable/' . PROJECT_CREATOR . '/' . PROJECT_NAME . '/system/localizations');
+/* define('PROJECT_CERTIFICATE', SETTINGS . DIRECTORY_SEPARATOR . 'cert.pem'); */
 
 define('LANGUAGE_DEFAULT', language::en);
 

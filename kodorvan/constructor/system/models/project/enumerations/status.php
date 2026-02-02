@@ -21,6 +21,9 @@ enum status
 	case creating;
 	case calculated;
 	case requested;
+
+	case invoiced;
+
 	case developing;
 	case developed;
 	case launched;
