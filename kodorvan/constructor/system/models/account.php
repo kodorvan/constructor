@@ -15,6 +15,9 @@ use kodorvan\constructor\models\core,
 // The library for languages support
 use mirzaev\languages\language;
 
+// The library for currencies support
+use mirzaev\currencies\currency;
+
 // Baza database
 use mirzaev\baza\database,
 	mirzaev\baza\column,

@@ -18,8 +18,8 @@ use mirzaev\minimal\core,
 	mirzaev\minimal\route;
 
 // Framework for Telegram
-/* use Telegram\Bot\BotsManager as telegram; */
 use SergiX44\Nutgram\Nutgram as telegram,
+	SergiX44\Nutgram\Configuration as telegram_settings,
 	SergiX44\Nutgram\RunningMode\Webhook as webhook,
 	SergiX44\Nutgram\Telegram\Types\Internal\InputFile as input;
 
@@ -59,7 +59,12 @@ define('TELEGRAM', require(SETTINGS . DIRECTORY_SEPARATOR . 'telegram.php'));
 require ROOT . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
 // Initializing the robot
-$robot = new telegram(TELEGRAM['constructor']['key']);
+$robot = new telegram(
+	token: TELEGRAM['constructor']['key'],
+	config: new telegram_settings(
+		botName: TELEGRAM['constructor']['name']
+	)
+);
 
 $robot->setWebhook(
 	url: 'https://' . PROJECT_DOMAIN . '/telegram/constructor/webhook.php',
@@ -69,61 +74,3 @@ $robot->setWebhook(
 	drop_pending_updates: false,
 	secret_token: 'bebra228'
 );
-
-/* // Initializing the robots manager settings
-$settings = [
-	'bots' => [
-		'constructor' => [
-			'token' => TELEGRAM['constructor']['key'],
-			'certificate_path' => PROJECT_CERTIFICATE,
-			'webhook_url' => 'https://' . PROJECT_DOMAIN . '/telegram/constructor/webhook.php',
-			'commands'    => [
-				start::class,
-			]
-		],
-		'async_requests' => true,
-		'base_bot_url' => 'https://' . PROJECT_DOMAIN . '/telegram',
-	]
-];
-
-// Initializing the robots manager
-$telegram = new telegram($settings);
-
-$updates = $telegram->bot('constructor')->setWebhook([
-	'url' => 'https://' . PROJECT_DOMAIN . '/telegram/constructor/webhook.php',
-	'certificate' => PROJECT_CERTIFICATE
-]);
- */
-
-
-/* // Initializing the updates listener
-$robot->onUpdate(function (context $context): void {});
-
-// Initializing the robot middlewares
-$robot->middleware([middlewares::class, 'account']);
-$robot->middleware([middlewares::class, 'language']);
-$robot->middleware([middlewares::class, 'localization']);
-$robot->middleware([middlewares::class, 'authorizations']);
-
-// Initializing the robot commands handlers
-$robot->onCommand('start', [commands::class, 'start']);
-
-$robot->onCommand('start telegram voronka', [commands::class, 'start']);
-$robot->onCommand('start parser', [commands::class, 'start']);
-$robot->onCommand('start calculator', [commands::class, 'start']);
-
-$robot->onCommand('language', [commands::class, 'language'])->middleware([middlewares::class, 'settings']);
-$robot->onCommand('society', [commands::class, 'society']);
-
-// Initializing the robot settings language buttons handlers
-foreach (language::cases() as $language) {
-	// Iterating over languages
-
-	// Initializing language buttons
-	$robot->onCbQueryData(["settings_language_$language->name"], fn(context $context) => settings::language($context, $language));
-};
-
-$robot->onCbQueryData('project_create', ['process_project_create', 'name']);
-
-// Starting chat-robot
-$robot->run(); */

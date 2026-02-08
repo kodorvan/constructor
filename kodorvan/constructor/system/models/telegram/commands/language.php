@@ -119,10 +119,13 @@ final class language extends command
 		// Initializing buffer of languages
 		$languages = type::cases();
 
-		// Deleting the actual language from buffer of languages
-		unset($languages[array_search($language, $languages, strict: true)]);
+		// Initializing the selected language index
+		$selected = array_search($language, $languages, strict: true);
 
-		// Sorting buffer of languages by the actual language
+		// Exclude the selected language from buffer of languages
+		if ($selected !== false) unset($languages[$selected]);
+
+		// Sorting buffer of languages by the selected language
 		$languages = [$language, ...$languages];
 
 		foreach ($languages as $language) {

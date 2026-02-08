@@ -61,30 +61,14 @@ final class localization extends core
 			if ($language instanceof language) {
 				// Initialized the language
 
-				try {
-					// Initializing the localization
-					$localization = new model($language);
+				// Initializing the localization
+				$localization = new model($language);
 
-					// Writing localization into the robot variable
-					$robot->set('localization', $localization);
+				// Writing localization into the robot variable
+				$robot->set('localization', $localization);
 
-					// Continuation of the process
-					$next($robot);
-				} catch (exception $exception) {
-					// Not initialized the localization
-
-					// Writing the exception into the errors output buffer
-					error_log((string) $exception);
-
-					// Sending the message
-					$robot->sendMessage(
-						text: '⚠️ *Failed to initialize the localization*',
-						parse_mode: mode::MARKDOWN
-					);
-
-					// Ending the conversation process
-					$robot->endConversation();
-				}
+				// Continuation of the process
+				$next($robot);
 			}
 		}
 	}

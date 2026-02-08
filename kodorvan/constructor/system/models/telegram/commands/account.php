@@ -6,7 +6,7 @@ namespace kodorvan\constructor\models\telegram\commands;
 
 // Files of the project
 use kodorvan\constructor\models\core,
-	kodorvan\constructor\models\account,
+	kodorvan\constructor\models\account as model,
 	kodorvan\constructor\models\settings,
 	kodorvan\constructor\models\localization,
 	kodorvan\constructor\models\telegram\processes\language\select as process_language_select;
@@ -27,28 +27,28 @@ use SergiX44\Nutgram\Nutgram as telegram,
 	SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton as button;
 
 /**
- * Command: start
+ * Command: account
  *
  * @package kodorvan\constructor\models\telegram\commands
  *
  * @license http://www.wtfpl.net/ Do What The Fuck You Want To Public License
  * @author Arsen Mirzaev Tatyano-Muradovich <arsen@mirzaev.sexy>
  */
-final class start extends command
+final class account extends command
 {
 	/**
 	 * Command
 	 *
 	 * @var string $name Name of the command
 	 */
-	protected string $command = 'start';
+	protected string $command = 'account';
 
 	/**
 	 * Description
 	 *
 	 * @var string $description
 	 */
-	protected ?string $description = 'Main menu';
+	protected ?string $description = 'Account profile';
 
 	/**
 	 * Localizations
@@ -58,8 +58,8 @@ final class start extends command
 	 * @var array $localizedDescriptions
 	 */
 	protected array $localizedDescriptions = [
-		'ru' => 'Главное меню',
-		'*' => 'Main menu'
+		'ru' => 'Профиль аккаунта',
+		'*' => 'Account profile'
 	];
 
 	/**
@@ -82,51 +82,37 @@ final class start extends command
 		// Initializing the account
 		$account = $robot->get('account');
 
-		// Initializing the message last update text
-		exec(command: 'git log --oneline $(git describe --tags --abbrev=0 @^ --always)..@ -1 --format="%at" | xargs -I{} date -d @{} "+%Y.%m.%d %H:%M"', output: $git);
-		$update = empty($git[0]) ? '' : "🔏 *$localization->menu_update:* " . unmarkdown($git[0]);
+		// Declaring buufer of rows about authorizations
+		$authorizations = '';
 
-		// Calculating amount of projects
-		$projects = count($account->projects());
+		// Initializing rows about authorization
+		foreach ($account->authorizations()?->record->values() as $key => $value) {
+			// Iterating over account parameters
 
-		// Calculating amount of partners
-		$partners = count(account::partners());
+			if (match ($key) {
+				'identifier', 'account', 'active', 'updated', 'created' => false,
+				default => true
+			} && !str_starts_with($key, 'system_')) {
+				// The value is not metadata and system authorozations
 
-		// Initializing the keyboard
-		$keyboard = keyboard::make();
+				// Writing into buffer of rows about authorizations
+				$authorizations .= ($value ? '✅' : '❎') . ' *' . ($localization["authorization_$key"] ?? $key) . ':* ' . ($value ? $localization->yes : $localization->no) . "\n";
+			}
+		}
 
-		// Writing the row into the keyboard
-		$keyboard->addRow(
-			button::make(
-				text: "📂 $localization->menu_button_project_new",
-				callback_data: 'project_create'
-			),
-			button::make(
-				text: "🗂 $localization->menu_button_projects: $projects",
-				callback_data: 'projects'
-			),
-		);
-
-		// Writing the row into the keyboard
-		$keyboard->addRow(
-			button::make(
-				text: "📡 $localization->menu_button_operator",
-				url: PROJECT_OPERATOR_URL ?? PROJECT_MEDIA_URL ?? 'https://t.me/kodorvan'
-			)
-		);
+		// Trimming the last line break character
+		$authorizations = trim($authorizations, "\n");
 
 		$robot->sendMessage(
 			text: implode(
 				"\n\n",
 				[
-					"📋 *$localization->menu_title*",
-					$projects > 0 ? printf($localization->menu_description_partner, $partners) : $localization->menu_description_guest,
-					$update
+					"🫵 *$localization->account_title*",
+					$authorizations
 				]
 			),
 			parse_mode: mode::MARKDOWN,
-			disable_notification: true,
-			reply_markup: $keyboard
+			disable_notification: true
 		);
 	}
 }

@@ -25,6 +25,8 @@ return [
 	'settings_language_button_add' => 'Add a language',
 
 	// Authorization
+	'authorization_system' => 'System',
+	'authorization_settings' => 'Settings',
 	'not_authorized_system' => 'You do not have access to the system',
 	'not_authorized_settings' => 'You do not have access to the settings',
 	'not_authorized_system_settings' => 'You do not have access to the system settings',

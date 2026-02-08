@@ -8,8 +8,10 @@ namespace kodorvan\constructor;
 use kodorvan\constructor\models\account,
 	kodorvan\constructor\models\telegram\settings,
 	kodorvan\constructor\models\telegram\commands\start as command_start,
+	kodorvan\constructor\models\telegram\commands\account as command_account,
 	kodorvan\constructor\models\telegram\commands\society as command_society,
 	kodorvan\constructor\models\telegram\commands\language as command_language,
+	kodorvan\constructor\models\telegram\conversations\project\create as conversation_project_create,
 	kodorvan\constructor\models\telegram\middlewares\account as middleware_account,
 	kodorvan\constructor\models\telegram\middlewares\language as middleware_language,
 	kodorvan\constructor\models\telegram\middlewares\localization as middleware_localization,
@@ -24,9 +26,13 @@ use mirzaev\minimal\core,
 	mirzaev\minimal\route;
 
 // Framework for Telegram
-/* use Telegram\Bot\BotsManager as telegram; */
 use SergiX44\Nutgram\Nutgram as telegram,
+	SergiX44\Nutgram\Configuration as telegram_settings,
 	SergiX44\Nutgram\RunningMode\Webhook as webhook;
+
+// The symphony cache library
+use Symfony\Component\Cache\Adapter\FilesystemAdapter as cache_adapter,
+	Symfony\Component\Cache\Psr16Cache as cache;
 
 // Enabling debugging
 /* ini_set('error_reporting', E_ALL);
@@ -64,7 +70,13 @@ define('TELEGRAM', require(SETTINGS . DIRECTORY_SEPARATOR . 'telegram.php'));
 require ROOT . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
 // Initializing the robot
-$robot = new telegram(TELEGRAM['constructor']['key']);
+$robot = new telegram(
+	token: TELEGRAM['constructor']['key'],
+	config: new telegram_settings(
+		botName: TELEGRAM['constructor']['name'],
+		cache: new cache(new cache_adapter())
+	)
+);
 
 $webhook = new webhook(secretToken: 'bebra228');
 $webhook->setSafeMode(true);
@@ -77,24 +89,28 @@ $robot->middleware(middleware_localization::class);
 $robot->middleware(middleware_authorizations::class);
 
 
-// Initializing the robot commands handlers
+// Start
 $robot->registerCommand(command_start::class);
-
 $robot->onCommand('start telegram voronka', command_start::class);
 $robot->onCommand('start parser', command_start::class);
 $robot->onCommand('start calculator', command_start::class);
 
-$robot->registerCommand(command_language::class)->middleware(middleware_settings::class);
-$robot->registerCommand(command_society::class);
+// Account
+$robot->registerCommand(command_account::class);
 
-// Initializing the robot settings language buttons handlers
+// Language
+$robot->registerCommand(command_language::class)->middleware(middleware_settings::class);
 foreach (language::cases() as $language) {
 	// Iterating over languages
 
-	// Initializing language buttons
-	$robot->onCallbackQueryData("settings_language_$language->name", fn(telegram $robot) => settings::language(robot: $robot, language: $language));
+	// Select the language
+	$robot->onCallbackQueryData('settings_language_$language->name', fn(telegram $robot) => settings::language(robot: $robot, language: $language));
 };
 
-/* $robot->onCbQueryData('project_create', ['process_project_create', 'name']); */
+// Society
+$robot->registerCommand(command_society::class);
+
+// Project: create
+$robot->onCallbackQueryData('project_create', conversation_project_create::class);
 
 $robot->run();

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4cea1a922de2838a239ca7633443750c",
+    "content-hash": "1f5b64f8a594a24294320f54e2470337",
     "packages": [
         {
             "name": "badfarm/zanzara",

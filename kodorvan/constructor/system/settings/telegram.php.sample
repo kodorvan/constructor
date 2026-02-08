@@ -4,6 +4,7 @@
 return [
 	'constructor' => [
 		'identifier' => 0,
+		'name' => 'kodorvan',
 		'domain' => '',
 		'key' => '',
 		'database' => [
