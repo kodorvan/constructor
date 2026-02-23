@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace kodorvan\constructor\models\telegram\middlewares;
 
 // Files of the project
-use kodorvan\constructor\models\core,
-	kodorvan\constructor\models\account,
+use kodorvan\constructor\models\account,
 	kodorvan\constructor\models\authorizations;
 
 // The library for languages support
@@ -30,7 +29,7 @@ use Error as error;
  * @license http://www.wtfpl.net/ Do What The Fuck You Want To Public License
  * @author Arsen Mirzaev Tatyano-Muradovich <arsen@mirzaev.sexy>
  */
-final class language extends core
+final class language
 {
 	/**
 	 * Language

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1f5b64f8a594a24294320f54e2470337",
+    "content-hash": "44219ee87ec9e34c98a5404150eb4ac0",
     "packages": [
         {
             "name": "badfarm/zanzara",
@@ -1923,16 +1923,16 @@
         },
         {
             "name": "nutgram/nutgram",
-            "version": "4.40.2",
+            "version": "4.42.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nutgram/nutgram.git",
-                "reference": "caf0deb11f6dae93b407f5bb85a94d5336a1b945"
+                "reference": "034257dbc29947b73e04b5d92b07d780d8962810"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nutgram/nutgram/zipball/caf0deb11f6dae93b407f5bb85a94d5336a1b945",
-                "reference": "caf0deb11f6dae93b407f5bb85a94d5336a1b945",
+                "url": "https://api.github.com/repos/nutgram/nutgram/zipball/034257dbc29947b73e04b5d92b07d780d8962810",
+                "reference": "034257dbc29947b73e04b5d92b07d780d8962810",
                 "shasum": ""
             },
             "require": {
@@ -1994,7 +1994,7 @@
             ],
             "support": {
                 "issues": "https://github.com/nutgram/nutgram/issues",
-                "source": "https://github.com/nutgram/nutgram/tree/4.40.2"
+                "source": "https://github.com/nutgram/nutgram/tree/4.42.0"
             },
             "funding": [
                 {
@@ -2006,7 +2006,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-01-25T17:57:40+00:00"
+            "time": "2026-02-12T17:23:52+00:00"
         },
         {
             "name": "nyholm/psr7",

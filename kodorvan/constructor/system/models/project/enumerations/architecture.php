@@ -18,22 +18,22 @@ use InvalidArgumentException as exception_argument,
 	DomainException as exception_domain;
 
 /**
- * Type
+ * Architecture
  *
  * @package kodorvan\neurobot\models\project\enumerations
  *
  * @license http://www.wtfpl.net/ Do What The Fuck You Want To Public License
  * @author Arsen Mirzaev Tatyano-Muradovich <arsen@mirzaev.sexy>
  */
-enum type
+enum architecture
 {
 	case chat_robot;
 	case parser;
-	case calculator;
+	case script;
 	case crm;
-		/* case marketplace; */
 	case site;
 	case program;
+	/* case calculator; */
 
 	case complex;
 
@@ -42,7 +42,7 @@ enum type
 	 *
 	 * @param language $language The language
 	 *
-	 * @return string The project type label
+	 * @return string The project architecture label
 	 */
 	public function label(language $language = LANGUAGE_DEFAULT): string
 	{
@@ -56,17 +56,13 @@ enum type
 				language::en => 'Parser',
 				language::ru => 'Парсер'
 			},
-			static::calculator => match ($language) {
-				language::en => 'Calculator',
-				language::ru => 'Калькулятор'
+			static::script => match ($language) {
+				language::en => 'Script',
+				language::ru => 'Скрипт'
 			},
 			static::crm => match ($language) {
 				default => 'CRM'
 			},
-			/* static::marketplace => match ($language) {
-				language::en => 'Marketplace',
-				language::ru => 'Маркетплейс'
-			}, */
 			static::site => match ($language) {
 				language::en => 'Site',
 				language::ru => 'Сайт'
@@ -93,9 +89,8 @@ enum type
 		return match ($this) {
 			static::chat_robot => 2,
 			static::parser => 1,
-			static::calculator => 2,
+			static::script => 1,
 			static::crm => 1,
-			/* static::marketplace => 4, */
 			static::site => 1,
 			static::program => 1,
 			static::complex => 2,
@@ -119,6 +114,7 @@ enum type
 				purpose::game,
 				purpose::gallery,
 				purpose::crm,
+				purpose::calculate,
 				purpose::landing,
 				purpose::marketplace,
 				purpose::events,
@@ -127,8 +123,8 @@ enum type
 			static::parser => [
 				purpose::search
 			],
-			static::calculator => [
-				purpose::calculate
+			static::script => [
+				purpose::logic
 			],
 			static::crm => [
 				purpose::workers,
@@ -142,6 +138,7 @@ enum type
 				purpose::neural_network,
 				purpose::gallery,
 				purpose::crm,
+				purpose::calculate,
 				purpose::landing,
 				purpose::marketplace,
 				purpose::workers,
@@ -153,6 +150,7 @@ enum type
 			static::program => [
 				purpose::neural_network,
 				purpose::crm,
+				purpose::calculate,
 				purpose::marketplace,
 				purpose::workers,
 				purpose::tools,
@@ -168,6 +166,8 @@ enum type
 	 * Cost
 	 *
 	 * @return int|float The minimal cost of the project development
+	 *
+	 * @deprecated
 	 */
 	public function cost(currency $currency = CURRENCY_DEFAULT): int|float
 	{
@@ -181,9 +181,9 @@ enum type
 				currency::usd => 35,
 				currency::rub => 3500
 			},
-			static::calculator => match ($currency) {
-				currency::usd => 40,
-				currency::rub => 4000
+			static::script => match ($currency) {
+				currency::usd => 10,
+				currency::rub => 1000
 			},
 			static::crm => match ($currency) {
 				currency::usd => 100,
@@ -201,6 +201,26 @@ enum type
 				currency::usd => 100,
 				currency::rub => 10000
 			}
+		};
+	}
+
+	/**
+	 * Coefficient
+	 *
+	 * @return int The project development hours
+	 */
+	public function coefficient(): int|float
+	{
+		// Exit (success)
+		return (int) match ($this) {
+			static::chat_robot => 3,
+			static::parser => 2,
+			static::script => 1,
+			static::crm => 6,
+			static::site => 3,
+			static::program => 4,
+			static::complex => 5,
+			default => 5
 		};
 	}
 }

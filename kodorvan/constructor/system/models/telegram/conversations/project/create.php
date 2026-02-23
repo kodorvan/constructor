@@ -9,7 +9,7 @@ use kodorvan\constructor\models\core,
 	kodorvan\constructor\models\account,
 	kodorvan\constructor\models\localization,
 	kodorvan\constructor\models\settings,
-	kodorvan\constructor\models\project\enumerations\type as project_type,
+	kodorvan\constructor\models\project\enumerations\architecture as project_architecture,
 	kodorvan\constructor\models\project\enumerations\purpose as project_purpose,
 	kodorvan\constructor\models\telegram\processes\language\select as process_language_select;
 
@@ -50,11 +50,11 @@ final class create extends menu
 	public string $text = '';
 
 	/**
-	 * Type
+	 * Architecture
 	 *
-	 * @var project_type $type The project type
+	 * @var project_architecture $architecture The project architecture
 	 */
-	public project_type $type;
+	public project_architecture $architecture;
 
 	/**
 	 * Purpose
@@ -69,29 +69,40 @@ final class create extends menu
 	 * Generate the project create menu and start the process
 	 *
 	 * @param telegram $robot The robot
+	 * @param bool $new Create a new process?
 	 *
 	 * @return void
 	 */
-	public function start(telegram $robot): void
+	public function start(telegram $robot, bool $new = true): void
 	{
-		// Initializing the language
+		if ($new) {
+			// Requested creating a new process 
+
+			// Ending the conversation
+			$robot->endConversation();
+		}
+
+		// Initializing the account language
 		$language = $robot->get('language') ?? LANGUAGE_DEFAULT;
 
-		// Initializing the menu message localization
+		// Initializing the account localization
 		$localization = $robot->get('localization') ?? new localization($language);
 
 		// Initializing the account
 		$account = $robot->get('account');
 
-		// Initializing the project development cost
-		$cost = $this->cost();
+		// Initializing the project development hours
+		$hours = $this->hours();
 
 		// Generating the message text
 		$text = implode(
 			"\n\n",
 			[
 				"🏛 *$localization->project_create_title*",
-				$cost > 0 ? "*$localization->project_create_cost:* " . $cost . ($account->currency?->symbol() ?? CURRENCY_DEFAULT->symbol()) : $localization->project_create_description
+				/* $hours > 0 ? "*$localization->project_create_time* " . unmarkdown((string) $hours) . " $localization->hours" : $localization->project_create_description */
+				$hours > 0
+					? "*$localization->project_create_time:* $hours$localization->project_create_time_hours"
+					: $localization->project_create_description,
 			]
 		);
 
@@ -104,19 +115,19 @@ final class create extends menu
 			);
 		}
 
-		if (isset($this->type)) {
-			// Initialized the project type
+		if (isset($this->architecture)) {
+			// Initialized the project architecture
 
 			// Initializing the buffer for the first row
 			$first = [];
 
-			// Writing the project type button into the buffer of the first row
+			// Writing the project architecture button into the buffer of the first row
 			$first[0] = button::make(
-				text: $localization['project_type_' . $this->type?->name] ?? $this->type?->label(language: $language),
-				callback_data: '@types'
+				text: $localization['project_architecture_' . $this->architecture?->name] ?? $this->architecture?->label(language: $language),
+				callback_data: '@architectures'
 			);
 
-			if (isset($this->purpose) || $this->type === project_type::complex) {
+			if (isset($this->purpose) || $this->architecture === project_architecture::complex) {
 				// Initialized the project purpose
 
 				// Writing the project purpose button into the buffer of the first row
@@ -134,14 +145,13 @@ final class create extends menu
 				// Initializing the maximum amount of buttons in a row
 				$break = 2;
 
-				if (match ($this->type) {
-					project_type::chat_robot,
-					project_type::parser,
-					project_type::calculator,
-					project_type::crm,
-					project_type::site,
-					project_type::program,
-					project_type::complex => true,
+				if (match ($this->architecture) {
+					project_architecture::chat_robot,
+					project_architecture::parser,
+					project_architecture::crm,
+					project_architecture::site,
+					project_architecture::program,
+					project_architecture::complex => true,
 					default => false
 				}) {
 					// Integrations
@@ -155,14 +165,13 @@ final class create extends menu
 					}
 				}
 
-				if (match ($this->type) {
-					project_type::chat_robot,
-					project_type::parser,
-					project_type::calculator,
-					project_type::crm,
-					project_type::site,
-					project_type::program,
-					project_type::complex => true,
+				if (match ($this->architecture) {
+					project_architecture::chat_robot,
+					project_architecture::parser,
+					project_architecture::crm,
+					project_architecture::site,
+					project_architecture::program,
+					project_architecture::complex => true,
 					default => false
 				}) {
 					// Server
@@ -176,12 +185,11 @@ final class create extends menu
 					}
 				}
 
-				if (match ($this->type) {
-					project_type::calculator,
-					project_type::crm,
-					project_type::site,
-					project_type::program,
-					project_type::complex => true,
+				if (match ($this->architecture) {
+					project_architecture::crm,
+					project_architecture::site,
+					project_architecture::program,
+					project_architecture::complex => true,
 					default => false
 				}) {
 					// Interface
@@ -189,15 +197,11 @@ final class create extends menu
 					if (isset($this->interface)) {
 						// Initialized the project interface
 
-						if ($this->type === project_type::calculator) {
-							// Calculator
-
-							// site, mobile or desktop program
-						} else if ($this->type === project_type::crm) {
+						if ($this->architecture === project_architecture::crm) {
 							// CRM
 
 							// site, mobile or desktop program
-						} else if ($this->type === project_type::program) {
+						} else if ($this->architecture === project_architecture::program) {
 							// Program
 
 							// mobile or desktop
@@ -205,15 +209,11 @@ final class create extends menu
 					} else {
 						// Not initialized the project interface
 
-						if ($this->type === project_type::calculator) {
-							// Calculator
-
-							// site, mobile or desktop program
-						} else if ($this->type === project_type::crm) {
+						if ($this->architecture === project_architecture::crm) {
 							// CRM
 
 							// site, mobile or desktop program
-						} else if ($this->type === project_type::program) {
+						} else if ($this->architecture === project_architecture::program) {
 							// Program
 
 							// mobile or desktop
@@ -221,14 +221,13 @@ final class create extends menu
 					}
 				}
 
-				if (match ($this->type) {
-					project_type::chat_robot,
-					project_type::parser,
-					project_type::calculator,
-					project_type::crm,
-					project_type::site,
-					project_type::program,
-					project_type::complex => true,
+				if (match ($this->architecture) {
+					project_architecture::chat_robot,
+					project_architecture::parser,
+					project_architecture::crm,
+					project_architecture::site,
+					project_architecture::program,
+					project_architecture::complex => true,
 					default => false
 				}) {
 					// Repository
@@ -242,12 +241,31 @@ final class create extends menu
 					}
 				}
 
-				if (match ($this->type) {
-					project_type::calculator,
-					project_type::crm,
-					project_type::site,
-					project_type::program,
-					project_type::complex => true,
+				if (match ($this->architecture) {
+					project_architecture::chat_robot,
+					project_architecture::parser,
+					project_architecture::crm,
+					project_architecture::site,
+					project_architecture::program,
+					project_architecture::complex => true,
+					default => false
+				}) {
+					// Launch strategy (fast, quality, progressively)
+
+					if (isset($this->strategy)) {
+						// Initialized the project strategy
+
+					} else {
+						// Not initialized the project strategy
+
+					}
+				}
+
+				if (match ($this->architecture) {
+					project_architecture::crm,
+					project_architecture::site,
+					project_architecture::program,
+					project_architecture::complex => true,
 					default => false
 				}) {
 					// Testing
@@ -261,11 +279,11 @@ final class create extends menu
 					}
 				}
 
-				if (match ($this->type) {
-					project_type::crm,
-					project_type::site,
-					project_type::program,
-					project_type::complex => true,
+				if (match ($this->architecture) {
+					project_architecture::crm,
+					project_architecture::site,
+					project_architecture::program,
+					project_architecture::complex => true,
 					default => false
 				}) {
 					// Security
@@ -279,14 +297,13 @@ final class create extends menu
 					}
 				}
 
-				if (match ($this->type) {
-					project_type::chat_robot,
-					project_type::parser,
-					project_type::calculator,
-					project_type::crm,
-					project_type::site,
-					project_type::program,
-					project_type::complex => true,
+				if (match ($this->architecture) {
+					project_architecture::chat_robot,
+					project_architecture::parser,
+					project_architecture::crm,
+					project_architecture::site,
+					project_architecture::program,
+					project_architecture::complex => true,
 					default => false
 				}) {
 					// Documenting
@@ -300,13 +317,12 @@ final class create extends menu
 					}
 				}
 
-				if (match ($this->type) {
-					project_type::chat_robot,
-					project_type::calculator,
-					project_type::crm,
-					project_type::site,
-					project_type::program,
-					project_type::complex => true,
+				if (match ($this->architecture) {
+					project_architecture::chat_robot,
+					project_architecture::crm,
+					project_architecture::site,
+					project_architecture::program,
+					project_architecture::complex => true,
 					default => false
 				}) {
 					// Localization
@@ -320,13 +336,12 @@ final class create extends menu
 					}
 				}
 
-				if (match ($this->type) {
-					project_type::chat_robot,
-					project_type::parser,
-					project_type::calculator,
-					project_type::crm,
-					project_type::site,
-					project_type::complex => true,
+				if (match ($this->architecture) {
+					project_architecture::chat_robot,
+					project_architecture::parser,
+					project_architecture::crm,
+					project_architecture::site,
+					project_architecture::complex => true,
 					default => false
 				}) {
 					// Journal
@@ -340,13 +355,12 @@ final class create extends menu
 					}
 				}
 
-				if (match ($this->type) {
-					project_type::chat_robot,
-					project_type::calculator,
-					project_type::crm,
-					project_type::site,
-					project_type::program,
-					project_type::complex => true,
+				if (match ($this->architecture) {
+					project_architecture::chat_robot,
+					project_architecture::crm,
+					project_architecture::site,
+					project_architecture::program,
+					project_architecture::complex => true,
 					default => false
 				}) {
 					// Scalability
@@ -360,11 +374,11 @@ final class create extends menu
 					}
 				}
 
-				if (match ($this->type) {
-					project_type::chat_robot,
-					project_type::crm,
-					project_type::site,
-					project_type::complex => true,
+				if (match ($this->architecture) {
+					project_architecture::chat_robot,
+					project_architecture::crm,
+					project_architecture::site,
+					project_architecture::complex => true,
 					default => false
 				}) {
 					// Framework
@@ -378,14 +392,13 @@ final class create extends menu
 					}
 				}
 
-				if (match ($this->type) {
-					project_type::chat_robot,
-					project_type::parser,
-					project_type::calculator,
-					project_type::crm,
-					project_type::site,
-					project_type::program,
-					project_type::complex => true,
+				if (match ($this->architecture) {
+					project_architecture::chat_robot,
+					project_architecture::parser,
+					project_architecture::crm,
+					project_architecture::site,
+					project_architecture::program,
+					project_architecture::complex => true,
 					default => false
 				}) {
 					// Database
@@ -399,13 +412,12 @@ final class create extends menu
 					}
 				}
 
-				if (match ($this->type) {
-					project_type::chat_robot,
-					project_type::calculator,
-					project_type::crm,
-					project_type::site,
-					project_type::program,
-					project_type::complex => true,
+				if (match ($this->architecture) {
+					project_architecture::chat_robot,
+					project_architecture::crm,
+					project_architecture::site,
+					project_architecture::program,
+					project_architecture::complex => true,
 					default => false
 				}) {
 					// Depth of development
@@ -419,17 +431,16 @@ final class create extends menu
 					}
 				}
 
-				if (match ($this->type) {
-					project_type::chat_robot,
-					project_type::parser,
-					project_type::calculator,
-					project_type::crm,
-					project_type::site,
-					project_type::program,
-					project_type::complex => true,
+				if (match ($this->architecture) {
+					project_architecture::chat_robot,
+					project_architecture::parser,
+					project_architecture::crm,
+					project_architecture::site,
+					project_architecture::program,
+					project_architecture::complex => true,
 					default => false
 				}) {
-					// Form of cooperation
+					// architecture of cooperation
 
 					if (isset($this->cooperation)) {
 						// Initialized the project cooperation
@@ -452,21 +463,21 @@ final class create extends menu
 				$this->addButtonRow(...$first);
 			}
 		} else {
-			// Not initialized the project type
+			// Not initialized the project architecture
 
-			// Writing the project type button
+			// Writing the project architecture button
 			$this->addButtonRow(
 				button::make(
-					text: "🔸 $localization->project_create_button_type",
-					callback_data: '@types'
+					text: "🔸 $localization->project_create_button_architecture",
+					callback_data: '@architectures'
 				)
 			);
 		}
 
-		if ($cost > 0) {
-			// The project development cost was calculated
+		if ($hours > 0) {
+			// The project development hours was calculated
 
-			// Writing the project type button
+			// Writing the project architecture button
 			$this->addButtonRow(
 				button::make(
 					text: "☑️ $localization->project_create_button_request",
@@ -480,20 +491,20 @@ final class create extends menu
 	}
 
 	/**
-	 * Types
+	 * Architectures
 	 * 
-	 * Generate the project type select menu
+	 * Generate the project architecture select menu
 	 *
 	 * @param telegram $robot The robot
 	 *
 	 * @return void
 	 */
-	public function types(telegram $robot): void
+	public function architectures(telegram $robot): void
 	{
-		// Initializing the language
+		// Initializing the account language
 		$language = $robot->get('language') ?? LANGUAGE_DEFAULT;
 
-		// Initializing the menu message localization
+		// Initializing the account localization
 		$localization = $robot->get('localization') ?? new localization($language);
 
 		// Initializing the account
@@ -504,8 +515,8 @@ final class create extends menu
 			text: implode(
 				"\n\n",
 				[
-					"⚙️ *$localization->project_create_types_title*",
-					$localization->project_create_types_description,
+					"⚙️ *$localization->project_create_architectures_title*",
+					$localization->project_create_architectures_description,
 				]
 			),
 			opt: [
@@ -525,37 +536,37 @@ final class create extends menu
 		// Initializing the maximum amount of buttons in a row
 		$break = 4;
 
-		// Initializing buffer of types
-		$types = project_type::cases();
+		// Initializing buffer of architectures
+		$architectures = project_architecture::cases();
 
-		if (isset($this->type)) {
-			// Initialized the selected type
+		if (isset($this->architecture)) {
+			// Initialized the selected architecture
 
 			// Initializing the selected purpose index
-			$selected = array_search($this->type ?? null, $types, strict: true);
+			$selected = array_search($this->architecture ?? null, $architectures, strict: true);
 
 			if ($selected !== false) {
-				// Found the selected type index
+				// Found the selected architecture index
 
-				// Exclude the selected type from buffer of types
-				unset($types[$selected]);
+				// Exclude the selected architecture from buffer of architectures
+				unset($architectures[$selected]);
 			}
 		}
 
 		// Declaring the generated buttons registry
 		$generated = [];
 
-		foreach ($types as $index => $type) {
-			// Iterating over types
+		foreach ($architectures as $index => $architecture) {
+			// Iterating over architectures
 
-			if (array_search($type, $generated)) {
-				// The type button is already generated
+			if (array_search($architecture, $generated)) {
+				// The architecture button is already generated
 
 				// Skipping the iteration
 				continue;
 			}
 
-			if ($length + $type->length() > $break && !empty($row)) {
+			if ($length + $architecture->length() > $break && !empty($row)) {
 				// Reached the limit of buttons in a row
 
 				// Writing the row into the menu
@@ -573,19 +584,19 @@ final class create extends menu
 			}
 
 			// Addition to row buttons length
-			$length += $type->length();
+			$length += $architecture->length();
 
-			// Writing the type button into the row
+			// Writing the architecture button into the row
 			$row[] = button::make(
-				text: $localization['project_type_' . $type->name] ?? $type->label(language: $language),
-				callback_data: "$type->name@type"
+				text: $localization['project_architecture_' . $architecture->name] ?? $architecture->label(language: $language),
+				callback_data: "$architecture->name@architecture"
 			);
 
-			// Initializing the next type
-			$next = $types[$index + 1] ?? null;
+			// Initializing the next architecture
+			$next = $architectures[$index + 1] ?? null;
 
 			if ($next?->length() >= $break) {
-				// The next type is the full-length button
+				// The next architecture is the full-length button
 
 				// Writing the row into the menu
 				$this->addButtonRow(...$row);
@@ -601,8 +612,8 @@ final class create extends menu
 
 				// Writing the button into the menu
 				$this->addButtonRow(button::make(
-					text: $localization['project_type_' . $next->name] ?? $next->label(language: $language),
-					callback_data: "$next->name@type"
+					text: $localization['project_architecture_' . $next->name] ?? $next->label(language: $language),
+					callback_data: "$next->name@architecture"
 				));
 
 				// Writing the button into the generated buttons registry
@@ -618,41 +629,62 @@ final class create extends menu
 		}
 
 		// Deinitializing deprecated variables
-		unset($row, $limit, $length, $generated, $types, $type);
+		unset($row, $limit, $length, $generated, $architectures, $architecture);
 
 		// Updating the message and saving its text
 		$this->text = $this->showMenu()->text;
 	}
 
 	/**
-	 * Type
+	 * architecture
 	 * 
-	 * Write the project type
+	 * Write the project architecture
 	 *
 	 * @param telegram $robot The robot
 	 *
 	 * @return void
 	 */
-	public function type(telegram $robot): void
+	public function architecture(telegram $robot): void
 	{
-		// Initializing the project type
-		$this->type = project_type::{$robot->callbackQuery()->data};
+		// Initializing the language
+		$language = $robot->get('language') ?? LANGUAGE_DEFAULT;
 
-		// Deinitializing the project purpose
-		unset($this->purpose);
+		// Initializing the account localization
+		$localization = $robot->get('localization') ?? new localization($language);
 
-		if (count($this->type->purposes()) === 1) {
-			// The project type has only 1 purpose
+		// Initializing the project architecture
+		$this->architecture = project_architecture::{$robot->callbackQuery()->data};
+
+		// Initializing the project architecture purposes
+		$purposes = $this->architecture->purposes();
+
+		if (count($purposes) === 1) {
+			// The project architecture has only 1 purpose
 
 			// Initializing the project purpose
-			$this->purpose = $this->type->purposes()[0];
+			$this->purpose = $purposes[0];
+		} else if (isset($this->purpose) && array_search($this->purpose, $purposes) !== false) {
+			// The project architrcture purpose is the same from deprecated purpose
+
+			// keep it
+		} else {
+			//
+
+			// Deinitializing the project purpose
+			unset($this->purpose);
 		}
+
+		// Sending the popup notification
+		$robot->answerCallbackQuery(
+			text: $localization['project_architecture_' . $this->architecture?->name] ?? $this->architecture?->label(language: $language),
+			show_alert: false
+		);
 
 		// Deleting the message buttons
 		$this->clearButtons();
 
 		// Deleting the message buttons
-		$this->start(robot: $robot);
+		$this->start(robot: $robot, new: false);
 	}
 
 	/**
@@ -666,10 +698,10 @@ final class create extends menu
 	 */
 	public function purposes(telegram $robot): void
 	{
-		// Initializing the language
+		// Initializing the account language
 		$language = $robot->get('language') ?? LANGUAGE_DEFAULT;
 
-		// Initializing the menu message localization
+		// Initializing the account localization
 		$localization = $robot->get('localization') ?? new localization($language);
 
 		// Initializing the account
@@ -702,7 +734,7 @@ final class create extends menu
 		$break = 4;
 
 		// Initializing buffer of purposes
-		$purposes = $this->type->purposes();
+		$purposes = $this->architecture->purposes();
 
 		if (isset($this->purpose)) {
 			// Initialized the selected purpose
@@ -826,44 +858,65 @@ final class create extends menu
 	 */
 	public function purpose(telegram $robot): void
 	{
+		// Initializing the account language
+		$language = $robot->get('language') ?? LANGUAGE_DEFAULT;
+
+		// Initializing the account localization
+		$localization = $robot->get('localization') ?? new localization($language);
+
 		// Initializing the project purpose
 		$this->purpose = project_purpose::{$robot->callbackQuery()->data};
+
+		// Sending the popup notification
+		$robot->answerCallbackQuery(
+			text: $localization['project_purpose_' . $this->purpose?->name] ?? $this->purpose?->label(language: $language),
+			show_alert: false
+		);
 
 		// Deleting the message buttons
 		$this->clearButtons();
 
 		// Deleting the message buttons
-		$this->start(robot: $robot);
+		$this->start(robot: $robot, new: false);
 	}
 
 	/**
-	 * Cost
+	 * Hours
 	 * 
-	 * Calculate the project development cost
+	 * Calculate the project development hours
 	 *
-	 * @return int|float The project development cost
+	 * @return int|float The project development hours
 	 */
-	public function cost(): int|float
-	{
-		// Declaring the project development cost
-		$cost = 0;
+	public function hours(): int|float
+	{		// Declaring coefficient
+		$coefficient = PROJECT_CREATE_START_COEFFICIENT ?? 0;
 
-		if (isset($this->type)) {
-			// Initialized the project type
+		if (isset($this->architecture)) {
+			// Initialized the project architecture
 
-			// Calculating the project development cost
-			$cost = $this->type->cost();
+			// Adding into the coefficient
+			$coefficient += $this->architecture->coefficient();
 		}
 
 		if (isset($this->purpose)) {
 			// Initialized the project purpose
 
-			// Calculating the project development cost
-			$cost *= $this->purpose->coefficient();
+			// Adding into the coefficient
+			$coefficient += $this->purpose->coefficient();
 		}
 
-		// Exit (success)
-		return $cost;
+		// Initializing start hours
+		$start = PROJECT_CREATE_START_HOURS ?? 1;
+		$start < 1 and $start = 1;
+
+		// Initializing additional hours
+		$additional = PROJECT_CREATE_HOURS_ADDITIONAL ?? 0;
+
+		// Calculating the development hours
+		$hours = $start * $coefficient + $additional;
+
+		// Calculating and exit (success)
+		return ceil(max($hours, PROJECT_CREATE_HOURS_MINIMAL));
 	}
 
 	/**
@@ -877,10 +930,10 @@ final class create extends menu
 	 */
 	public function request(telegram $robot): void
 	{
-		// Initializing the language
+		// Initializing the account language
 		$language = $robot->get('language') ?? LANGUAGE_DEFAULT;
 
-		// Initializing the menu message localization
+		// Initializing the account localization
 		$localization = $robot->get('localization') ?? new localization($language);
 
 		// Sending the message
@@ -890,7 +943,7 @@ final class create extends menu
 			disable_notification: true
 		);
 
-		// Stopping conversation
+		// Ending the conversation
 		$this->end();
 	}
 
@@ -905,10 +958,10 @@ final class create extends menu
 	 */
 	public function stop(telegram $robot): void
 	{
-		// Initializing the language
+		// Initializing the account language
 		$language = $robot->get('language') ?? LANGUAGE_DEFAULT;
 
-		// Initializing the menu message localization
+		// Initializing the account localization
 		$localization = $robot->get('localization') ?? new localization($language);
 
 		// Sending the message
@@ -918,7 +971,7 @@ final class create extends menu
 			disable_notification: true
 		);
 
-		// Stopping conversation
+		// Ending the conversation
 		$this->end();
 	}
 }

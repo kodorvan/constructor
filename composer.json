@@ -37,7 +37,7 @@
 		"react/filesystem": "^0.1.2",
 		"nyholm/psr7": "^1.8",
 		"irazasyed/telegram-bot-sdk": "^3.15",
-		"nutgram/nutgram": "^4.40",
+		"nutgram/nutgram": "^4.42",
 		"psr/simple-cache": "^3.0",
 		"symfony/cache": "^8.0"
 	},

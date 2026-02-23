@@ -21,9 +21,18 @@ define('PROJECT_MEDIA_URL', 'https://t.me/kodorvan');
 define('PROJECT_OPERATOR_URL', 'https://t.me/kodorvan?direct');
 define('PROJECT_REPOSITORY', REPOSITORY . '/' . PROJECT_CREATOR . '/' . PROJECT_NAME);
 define('PROJECT_REPOSITORY_LANGUAGE_ADD',  PROJECT_REPOSITORY . '/src/branch/stable/' . PROJECT_CREATOR . '/' . PROJECT_NAME . '/system/localizations');
-/* define('PROJECT_CERTIFICATE', SETTINGS . DIRECTORY_SEPARATOR . 'cert.pem'); */
 
-define('CURRENCY_DEFAULT', currency::usd);
+define('PROJECT_CREATE_START_HOURS', 1);
+define('PROJECT_CREATE_START_COEFFICIENT', 0);
+define('PROJECT_CREATE_HOURS_ADDITIONAL', 0);
+define('PROJECT_CREATE_HOURS_MINIMAL', 4);
+define('PROJECT_CREATE_COST_HOUR_DEFAULT', 1200);
+
+define('PROJECT_CREATE_REQUEST_CHATS', [
+
+]);
+
+define('CURRENCY_DEFAULT', currency::rub);
 define('LANGUAGE_DEFAULT', language::en);
 
 // Initializing default theme for the views templater

@@ -2,18 +2,17 @@
 
 // Telegram API chat-robot
 return [
-	'constructor' => [
-		'identifier' => 0,
-		'name' => 'kodorvan',
-		'domain' => '',
-		'key' => '',
-		'database' => [
-			'host'     => '/run/mysqld/mysqld.sock',
-			'port'     => 3306,
-			'user'     => '',
-			'password' => '',
-			'database' => '',
-		]
+	'identifier' => 0,
+	'domain' => 'kodorvan_bot',
+	'name' => 'kodorvan',
+	'password' => '',
+	'key' => '',
+	'database' => [
+		'host'     => '/run/mysqld/mysqld.sock',
+		'port'     => 3306,
+		'user'     => '',
+		'password' => '',
+		'database' => '',
 	]
 ];
 

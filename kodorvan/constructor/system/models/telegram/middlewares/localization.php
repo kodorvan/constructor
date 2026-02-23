@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace kodorvan\constructor\models\telegram\middlewares;
 
 // Files of the project
-use kodorvan\constructor\models\core,
-	kodorvan\constructor\models\account,
+use kodorvan\constructor\models\account,
 	kodorvan\constructor\models\localization as model,
 	kodorvan\constructor\models\authorizations;
 
@@ -32,7 +31,7 @@ use Exception as exception,
  * @license http://www.wtfpl.net/ Do What The Fuck You Want To Public License
  * @author Arsen Mirzaev Tatyano-Muradovich <arsen@mirzaev.sexy>
  */
-final class localization extends core
+final class localization
 {
 	/**
 	 * Localization

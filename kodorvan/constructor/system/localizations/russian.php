@@ -10,7 +10,7 @@ return [
 	// Главное меню
 	'menu_title' => 'Главное меню',
 	'menu_description_guest' => "🔥 *Создайте ваш первый проект* и получите *ориентировочную стоимость* всего за 2 минуты",
-	'menu_description_partner' => "*Благодарю за выбор нашей команды*. Теперь Вы один из наших %d партнёров!",
+	'menu_description_partner' => "*Благодарю за выбор нашей команды*\. Теперь Вы один из наших %d партнёров!",
 	'menu_update' => 'Последнее обновление',
 	'menu_button_project_new' => 'Создать',
 	'menu_button_projects' => 'Проекты',
@@ -24,14 +24,17 @@ return [
 
 	// Проект: создание
 	'project_create_title' => 'Создание проекта',
-	'project_create_description' => 'Получите ориентировочную стоимость всего за 2 минуты\!',
-	'project_create_cost' => 'Стоимость',
+	/* 'project_create_description' => "Расчитайте ориентировочное время разработки, затем выберите разработчиков и получите стоимость\n\nПосле расчётов можно будет отправить проект в заказ разработчикам и приложить ТЗ, либо краткое описание задачи\n\nМы погружаемся в проекты полностью, поэтому стараемся не распыляться - от степени нагрузки меняется коэффициент стоимости!", */
+	'project_create_description' => "Задайте параметры и получите ориентировочное время разработки, затем выберите разработчиков и получите стоимость их работы\n\n_После расчётов можно отправить проект в заказ и приложить ТЗ, либо описание задачи_",
+	'project_create_time' => 'Время разработки',
+	'project_create_time_hours' => 'ч',
+	'project_create_time_hours_from' => 'от',
 	'project_create_button_request' => 'Заказать',
 
-	'project_create_types_title' => 'Выбор типа проекта',
-	'project_create_types_description' => 'Каждый тип имеет уникальные параметры и коэффициент',
-	'project_create_button_type' => 'Тип проекта',
-	'project_create_button_type_selected' => 'Тип',
+	'project_create_architectures_title' => 'Выбор архитектуры проекта',
+	'project_create_architectures_description' => 'Каждая архитектура имеет уникальные параметры и коэффициенты \- это основа дальнейших расчётов\!',
+	'project_create_button_architecture' => 'Архитектура',
+	'project_create_button_architecture_selected' => 'Архитектура',
 
 	'project_create_purposes_title' => 'Выбор назначения',
 	'project_create_purposes_description' => 'Вектор разработки, основание проекта',
@@ -47,13 +50,13 @@ return [
 	'project_create_cancelled' => 'Создание проекта отменено',
 
 	// Проект: типы
-	'project_type_chat_robot' => 'Чат-робот',
-	'project_type_parser' => 'Парсер',
-	'project_type_calculator' => 'Калькулятор',
-	'project_type_crm' => 'CRM',
-	'project_type_site' => 'Сайт',
-	'project_type_program' => 'Программа',
-	'project_type_complex' => 'Нестандартный',
+	'project_architecture_chat_robot' => 'Чат-робот',
+	'project_architecture_parser' => 'Парсер',
+	'project_architecture_calculator' => 'Калькулятор',
+	'project_architecture_crm' => 'CRM',
+	'project_architecture_site' => 'Сайт',
+	'project_architecture_program' => 'Программа',
+	'project_architecture_complex' => 'Нестандартная',
 
 	// Проект: назначение
 	'project_purpose_funnel' => 'Воронка',

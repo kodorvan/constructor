@@ -71,14 +71,14 @@ require ROOT . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
 // Initializing the robot
 $robot = new telegram(
-	token: TELEGRAM['constructor']['key'],
+	token: TELEGRAM['key'],
 	config: new telegram_settings(
-		botName: TELEGRAM['constructor']['name'],
+		botName: TELEGRAM['name'],
 		cache: new cache(new cache_adapter())
 	)
 );
 
-$webhook = new webhook(secretToken: 'bebra228');
+$webhook = new webhook(secretToken: TELEGRAM['password']);
 $webhook->setSafeMode(true);
 
 $robot->setRunningMode($webhook);
@@ -87,7 +87,6 @@ $robot->middleware(middleware_account::class);
 $robot->middleware(middleware_language::class);
 $robot->middleware(middleware_localization::class);
 $robot->middleware(middleware_authorizations::class);
-
 
 // Start
 $robot->registerCommand(command_start::class);

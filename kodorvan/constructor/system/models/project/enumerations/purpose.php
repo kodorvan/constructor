@@ -31,6 +31,7 @@ enum purpose
 	case charity;
 	case search;
 	case calculate;
+	case logic;
 	case game;
 
 	case workers;
@@ -45,7 +46,7 @@ enum purpose
 	 *
 	 * @param language $language The language
 	 *
-	 * @return string The project type label
+	 * @return string The project form label
 	 */
 	public function label(language $language = LANGUAGE_DEFAULT): string
 	{
@@ -61,7 +62,7 @@ enum purpose
 			},
 			static::neural_network => match ($language) {
 				language::en => 'Neural network',
-				language::ru => 'Нейросети'
+				language::ru => 'Нейросеть'
 			},
 			static::game => match ($language) {
 				language::en => 'Game',
@@ -93,6 +94,10 @@ enum purpose
 			static::calculate => match ($language) {
 				language::en => 'Calculate',
 				language::ru => 'Расчёты'
+			},
+			static::logic => match ($language) {
+				language::en => 'Logic',
+				language::ru => 'Логика'
 			},
 			static::game => match ($language) {
 				language::en => 'Game',
@@ -141,6 +146,7 @@ enum purpose
 			static::charity => 2,
 			static::search => 2,
 			static::calculate => 2,
+			static::logic => 1,
 			static::tools => 1,
 			static::workers => 1,
 			static::objects => 1,
@@ -153,7 +159,7 @@ enum purpose
 	/**
 	 * Coefficient
 	 *
-	 * @return int|float Coefficient to the project development cost
+	 * @return int|float Coefficient to the project development hours
 	 */
 	public function coefficient(): int|float
 	{
@@ -170,6 +176,7 @@ enum purpose
 			static::charity => 0.8,
 			static::search => 1,
 			static::calculate => 1.1,
+			static::logic => 1,
 			static::tools => 1,
 			static::workers => 1.2,
 			static::objects => 1,

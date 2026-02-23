@@ -60,9 +60,9 @@ require ROOT . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
 // Initializing the robot
 $robot = new telegram(
-	token: TELEGRAM['constructor']['key'],
+	token: TELEGRAM['key'],
 	config: new telegram_settings(
-		botName: TELEGRAM['constructor']['name']
+		botName: TELEGRAM['name']
 	)
 );
 
@@ -72,5 +72,5 @@ $robot->setWebhook(
 	ip_address: SERVER_IP_ADDRESS,
 	max_connections: 10,
 	drop_pending_updates: false,
-	secret_token: 'bebra228'
+	secret_token: TELEGRAM['password']
 );
