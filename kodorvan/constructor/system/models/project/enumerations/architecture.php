@@ -33,7 +33,7 @@ enum architecture
 	case crm;
 	case site;
 	case program;
-	/* case calculator; */
+		/* case calculator; */
 
 	case complex;
 
@@ -105,6 +105,13 @@ enum architecture
 	 */
 	public function purposes(): array
 	{
+		// Initializing purposes
+		$purposes = purpose::cases();
+
+		// Deleting the special purpose
+		$indexes = array_keys($purposes, purpose::special);
+		foreach ($indexes as $index) unset($purposes[$index]);
+
 		// Exit (success)
 		return match ($this) {
 			static::chat_robot => [

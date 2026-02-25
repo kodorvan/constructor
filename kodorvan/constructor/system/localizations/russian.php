@@ -49,6 +49,18 @@ return [
 	'project_create_requested' => 'Проект создан и отправлен оператору',
 	'project_create_cancelled' => 'Создание проекта отменено',
 
+	'project_request_title' => 'Заказ #%d',
+	'project_request_architecture' => 'Архитектура',
+	'project_request_purpose' => 'Назначение',
+	'project_request_hours' => 'Часы',
+	'project_request_cost' => 'Стоимость',
+	'project_request_command' => 'Команда',
+	'project_request_empty' => 'Пусто',
+	'project_request_button_accept' => 'Принять',
+	'project_request_button_refuse' => 'Отказать',
+	'project_request_button_edit' => 'Редактировать',
+	'project_request_button_chat' => 'Чат с заказчиком',
+
 	// Проект: типы
 	'project_architecture_chat_robot' => 'Чат-робот',
 	'project_architecture_parser' => 'Парсер',
@@ -68,7 +80,7 @@ return [
 	'project_purpose_marketplace' => 'Маркетплейс',
 	'project_purpose_charity' => 'Благотворительность',
 	'project_purpose_search' => 'Поиск',
-	'project_purpose_calculate' => 'Расчёт',
+	'project_purpose_calcul+ate' => 'Расчёт',
 	'project_purpose_tools' => 'Инструменты',
 	'project_purpose_workers' => 'Рабочие',
 	'project_purpose_objects' => 'Предметы',

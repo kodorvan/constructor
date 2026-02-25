@@ -100,9 +100,9 @@ final class create extends menu
 			[
 				"🏛 *$localization->project_create_title*",
 				/* $hours > 0 ? "*$localization->project_create_time* " . unmarkdown((string) $hours) . " $localization->hours" : $localization->project_create_description */
-				$hours > 0
-					? "*$localization->project_create_time:* $hours$localization->project_create_time_hours"
-					: $localization->project_create_description,
+				$new
+					? $localization->project_create_description
+					: "*$localization->project_create_time:* $hours$localization->project_create_time_hours"
 			]
 		);
 
@@ -127,7 +127,7 @@ final class create extends menu
 				callback_data: '@architectures'
 			);
 
-			if (isset($this->purpose) || $this->architecture === project_architecture::complex) {
+			if (isset($this->purpose)) {
 				// Initialized the project purpose
 
 				// Writing the project purpose button into the buffer of the first row
@@ -474,7 +474,7 @@ final class create extends menu
 			);
 		}
 
-		if ($hours > 0) {
+		if (!$new) {
 			// The project development hours was calculated
 
 			// Writing the project architecture button
@@ -658,7 +658,12 @@ final class create extends menu
 		// Initializing the project architecture purposes
 		$purposes = $this->architecture->purposes();
 
-		if (count($purposes) === 1) {
+		if (empty($purposes)) {
+			// The project architecture has no purposes
+
+			// Initializing the project purpose
+			$this->purpose = project_purpose::special;
+		} else if (count($purposes) === 1) {
 			// The project architecture has only 1 purpose
 
 			// Initializing the project purpose
@@ -935,6 +940,73 @@ final class create extends menu
 
 		// Initializing the account localization
 		$localization = $robot->get('localization') ?? new localization($language);
+
+		// Initializing the receivers registry
+		$receivers = PROJECT_CREATE_REQUEST_RECEIVERS;
+
+		// Initializing project data
+		$architecture = unmarkdown($this->architecture?->label(language: $language) ?? $localization->project_request_empty);
+		$purpose = unmarkdown(isset($this->purpose) ? $this->purpose->label(language: $language) : $localization->project_request_empty);
+		$hours = $this->hours();
+
+		// Generating the message text
+		$text = implode(
+			"\n\n",
+			[
+				'*' . unmarkdown(sprintf("💸 $localization->project_request_title", $sex ?? 0)) . '*',
+				<<<TXT
+				*$localization->project_request_architecture:* $architecture
+				*$localization->project_request_purpose:* $purpose
+				TXT,
+				<<<TXT
+        *$localization->project_request_hours:* $hours
+        TXT
+			]
+		);
+
+		// Initializing the keyboard
+		$keyboard = keyboard::make();
+
+		// Writing the row into the keyboard
+		$keyboard->addRow(
+			button::make(
+				text: "✉️ $localization->project_request_button_chat",
+				url: 'https://t.me/' . $robot->user()->username
+			)
+		);
+
+		// Writing the row into the keyboard
+		$keyboard->addRow(
+			button::make(
+				text: "⚖️ $localization->project_request_button_edit",
+				callback_data: 'edit'
+			)
+		);
+
+		// Writing the row into the keyboard
+		$keyboard->addRow(
+			button::make(
+				text: "✅ $localization->project_request_button_accept",
+				callback_data: 'accept'
+			),
+			button::make(
+				text: "❌ $localization->project_request_button_refuse",
+				callback_data: 'refuse'
+			)
+		);
+
+		foreach ($receivers as $index => $receiver) {
+			// Iterating over receivers
+
+			// Sending the message
+			$robot->sendMessage(
+				text: $text,
+				chat_id: $receiver,
+				parse_mode: mode::MARKDOWN,
+				disable_notification: true,
+				reply_markup: $keyboard
+			);
+		}
 
 		// Sending the message
 		$robot->sendMessage(
