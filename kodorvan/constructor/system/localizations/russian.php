@@ -29,6 +29,7 @@ return [
 	'project_create_time' => 'Время разработки',
 	'project_create_time_hours' => 'ч',
 	'project_create_time_hours_from' => 'от',
+	'project_create_button_back' => 'Назад',
 	'project_create_button_request' => 'Заказать',
 
 	'project_create_architectures_title' => 'Выбор архитектуры проекта',
@@ -42,7 +43,7 @@ return [
 	'project_create_button_purpose_selected' => 'Назнач.',
 
 	'project_create_integrations_title' => 'Выбор интеграций',
-	'project_create_integrations_description' => 'Синхронизация, скачивание, загрузка, запись...',
+	'project_create_integrations_description' => "Синхронизация данных в реальном времени, скачивание, загрузка, перенос информации, админ\-панель, рассылка сообщений, подключение аккаунтов\.\.\.\n\n_Отправка запросов в *API*, генерация и перехват *HTTP\-сообщений*, *эмуляция* действий пользователя через *виртуальный браузер* с курсором мыши и клавиатурой, либо *нестандартные протоколы связи*_",
 	'project_create_button_integrations' => 'Интеграции',
 	'project_create_button_integrations_selected' => 'Интеграции',
 
@@ -86,6 +87,15 @@ return [
 	'project_purpose_objects' => 'Предметы',
 	'project_purpose_events' => 'События',
 	'project_purpose_special' => 'Особенный',
+
+	// Проект: интеграции
+	'project_integration_one_c' => '1C',
+	'project_integration_bitrix24' => 'Битрикс 24',
+	'project_integration_moy_sklad' => 'Мой Склад',
+	'project_integration_telegram' => 'Телеграм',
+	'project_integration_mail' => 'Почта',
+	'project_integration_excel' => 'Excel',
+	/* 'project_integration_' => '', */
 
 	// Настройки: язык
 	'settings_language_title' => 'Выбери язык',

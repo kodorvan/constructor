@@ -127,6 +127,85 @@ enum purpose
 	}
 
 	/**
+	 * Integrations
+	 *
+	 * @return array Integrations
+	 */
+	public function integrations(): array
+	{
+		// Exit (success)
+		return match ($this) {
+			static::funnel => [
+				integration::telegram,
+				integration::mail,
+				integration::bitrix24
+			],
+			static::contact => [
+				integration::mail,
+				integration::bitrix24
+			],
+			static::neural_network => [
+				integration::telegram
+			],
+			static::game => [
+				integration::telegram
+			],
+			static::gallery => [],
+			static::crm => [
+				integration::one_c,
+				integration::moy_sklad,
+				integration::excel
+			],
+			static::landing => [
+				integration::telegram
+			],
+			static::marketplace => [
+				integration::one_c,
+				integration::moy_sklad,
+				integration::excel
+			],
+			static::charity => [
+				integration::one_c,
+				integration::moy_sklad,
+				integration::excel
+			],
+			static::search => [],
+			static::calculate => [
+				integration::one_c,
+				integration::moy_sklad,
+				integration::excel
+			],
+			static::logic => [],
+			static::tools => [
+				integration::one_c,
+				integration::moy_sklad,
+				integration::excel
+			],
+			static::workers => [
+				integration::one_c,
+				integration::moy_sklad,
+				integration::excel
+			],
+			static::objects => [
+				integration::one_c,
+				integration::moy_sklad,
+				integration::excel
+			],
+			static::events => [
+				integration::one_c,
+				integration::moy_sklad,
+				integration::excel
+			],
+			static::special => [
+				integration::one_c,
+				integration::moy_sklad,
+				integration::excel
+			],
+			default => []
+		};
+	}
+
+	/**
 	 * Length
 	 *
 	 * @return int Amount of buttons cells length

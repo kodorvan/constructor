@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace kodorvan\constructor\models\project\enumerations;
 
 // Files of the project
-use kodorvan\constructor\models\project\enumerations\purpose;
+use kodorvan\constructor\models\project\enumerations\purpose,
+	kodorvan\constructor\models\project\enumerations\integration;
 
 // The library for languages support
 use mirzaev\languages\language;
@@ -168,6 +169,44 @@ enum architecture
 			default => []
 		};
 	}
+
+	/**
+	 * Integrations
+	 *
+	 * @return array Integrations
+	 */
+	/* public function integrations(): array
+	{
+		// Exit (success)
+		return match ($this) {
+			static::chat_robot => [
+				integration::one_c,
+				integration::moy_sklad
+			],
+			static::parser => [
+				integration::one_c,
+				integration::moy_sklad
+			],
+			static::script => [],
+			static::crm => [
+				integration::one_c,
+				integration::moy_sklad
+			],
+			static::site => [
+				integration::one_c,
+				integration::moy_sklad
+			],
+			static::program => [
+				integration::one_c,
+				integration::moy_sklad
+			],
+			static::complex => [
+				integration::one_c,
+				integration::moy_sklad
+			],
+			default => []
+		};
+	} */
 
 	/**
 	 * Cost

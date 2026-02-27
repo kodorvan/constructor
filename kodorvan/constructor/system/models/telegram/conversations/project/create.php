@@ -11,6 +11,7 @@ use kodorvan\constructor\models\core,
 	kodorvan\constructor\models\settings,
 	kodorvan\constructor\models\project\enumerations\architecture as project_architecture,
 	kodorvan\constructor\models\project\enumerations\purpose as project_purpose,
+	kodorvan\constructor\models\project\enumerations\integration as project_integration,
 	kodorvan\constructor\models\telegram\processes\language\select as process_language_select;
 
 // Library for languages support
@@ -64,6 +65,13 @@ final class create extends menu
 	public project_purpose $purpose;
 
 	/**
+	 * Integrations
+	 *
+	 * @var array $integrations The project integrations
+	 */
+	public array $integrations = [];
+
+	/**
 	 * Start
 	 * 
 	 * Generate the project create menu and start the process
@@ -81,6 +89,9 @@ final class create extends menu
 			// Ending the conversation
 			$robot->endConversation();
 		}
+
+		// Deleting the message buttons
+		$this->clearButtons();
 
 		// Initializing the account language
 		$language = $robot->get('language') ?? LANGUAGE_DEFAULT;
@@ -115,6 +126,12 @@ final class create extends menu
 			);
 		}
 
+		// Initializing the row
+		$row = [];
+
+		// Initializing the maximum amount of buttons in a row
+		$break = 3;
+
 		if (isset($this->architecture)) {
 			// Initialized the project architecture
 
@@ -139,29 +156,41 @@ final class create extends menu
 				// Writing the project buttons first row
 				$this->addButtonRow(...$first);
 
-				// Initializing the row
-				$row = [];
+				// Initializing the project integrations
+				$integrations = $this->purpose->integrations();
 
-				// Initializing the maximum amount of buttons in a row
-				$break = 2;
-
-				if (match ($this->architecture) {
-					project_architecture::chat_robot,
-					project_architecture::parser,
-					project_architecture::crm,
-					project_architecture::site,
-					project_architecture::program,
-					project_architecture::complex => true,
-					default => false
-				}) {
+				if (!empty($integrations)) {
 					// Integrations
 
-					if (isset($this->integrations)) {
-						// Initialized the project integrations
+					// Initializing the button text
+					$text = unmarkdown(
+						trim(
+							implode(
+								', ',
+								array_map(
+									fn(project_integration $integration) => $localization['project_integration_' . $integration?->name] ?? $integration?->label($language) ?? '',
+									$this->integrations,
+								)
+							),
+							' '
+						)
+					);
 
-					} else {
-						// Not initialized the project integrations
+					// Writing the project integrations button into the buffer of the first row
+					$row[] = button::make(
+						text: empty($text) ? $localization->project_create_button_integrations : $text,
+						callback_data: '@integrations'
+					);
 
+
+					if (count($row) >= $break) {
+						// The buttons row reach the limit
+
+						// Writing the buttons row
+						$this->addButtonRow(...$row);
+
+						// Deinitializing the buttons row
+						$row = [];
 					}
 				}
 
@@ -474,6 +503,16 @@ final class create extends menu
 			);
 		}
 
+		if (!empty($row)) {
+			// The buttons row has buttons
+
+			// Writing the buttons row
+			$this->addButtonRow(...$row);
+
+			// Deinitializing the buttons row
+			$row = [];
+		}
+
 		if (!$new) {
 			// The project development hours was calculated
 
@@ -489,6 +528,22 @@ final class create extends menu
 		// Updating the message and saving its text
 		$this->text = $this->orNext('stop')->showMenu()->text;
 	}
+
+	/**
+	 * Continue
+	 * 
+	 * Generate the project create menu and continue the process
+	 *
+	 * @param telegram $robot The robot
+	 *
+	 * @return void
+	 */
+	public function continue(telegram $robot): void
+	{
+		// Continuing the process
+		$this->start(robot: $robot, new: false);
+	}
+
 
 	/**
 	 * Architectures
@@ -576,7 +631,6 @@ final class create extends menu
 				$generated += $row;
 
 				// Reinitializing the row buttons length
-				/* $length -= $break; */
 				$length = 0;
 
 				// Reinitializing the row
@@ -621,7 +675,7 @@ final class create extends menu
 			}
 		}
 
-		if (!empty($row) > 0) {
+		if (!empty($row)) {
 			// The row was not writed 
 
 			// Writing the row into the menu
@@ -636,7 +690,7 @@ final class create extends menu
 	}
 
 	/**
-	 * architecture
+	 * Architecture
 	 * 
 	 * Write the project architecture
 	 *
@@ -655,29 +709,8 @@ final class create extends menu
 		// Initializing the project architecture
 		$this->architecture = project_architecture::{$robot->callbackQuery()->data};
 
-		// Initializing the project architecture purposes
-		$purposes = $this->architecture->purposes();
-
-		if (empty($purposes)) {
-			// The project architecture has no purposes
-
-			// Initializing the project purpose
-			$this->purpose = project_purpose::special;
-		} else if (count($purposes) === 1) {
-			// The project architecture has only 1 purpose
-
-			// Initializing the project purpose
-			$this->purpose = $purposes[0];
-		} else if (isset($this->purpose) && array_search($this->purpose, $purposes) !== false) {
-			// The project architrcture purpose is the same from deprecated purpose
-
-			// keep it
-		} else {
-			//
-
-			// Deinitializing the project purpose
-			unset($this->purpose);
-		}
+		// Clearing from deprecated parameters
+		$this->clear();
 
 		// Sending the popup notification
 		$robot->answerCallbackQuery(
@@ -788,12 +821,9 @@ final class create extends menu
 			// Addition to row buttons length
 			$length += $purpose->length();
 
-			// Initializing the coefficient
-			$coefficient = $purpose->coefficient();
-
 			// Writing the purpose button into the row
 			$row[] = button::make(
-				/* text: ($localization['project_purpose_' . $purpose->name] ?? $purpose->label(language: $language)) . (!empty($coefficient) ? ' x' . $coefficient : ''), */
+				/* text: ($localization['project_purpose_' . $purpose->name] ?? $purpose->label(language: $language)) . (!empty($coefficient) ? ' x' . $coeffici🔹ent : ''), */
 				text: $localization['project_purpose_' . $purpose->name] ?? $purpose->label(language: $language),
 				callback_data: "$purpose->name@purpose"
 			);
@@ -816,9 +846,6 @@ final class create extends menu
 				// Reinitializing the row buttons length
 				$length = 0;
 
-				// Initializing the coefficient
-				$coefficient = $next->coefficient();
-
 				// Writing the button into the menu
 				$this->addButtonRow(button::make(
 					/* text: ($localization['project_purpose_' . $next->name] ?? $next->label(language: $language)) . (!empty($coefficient) ? ' x' . $coefficient : ''), */
@@ -831,7 +858,7 @@ final class create extends menu
 			}
 		}
 
-		if (!empty($row) > 0) {
+		if (!empty($row)) {
 			// The row was not writed 
 
 			// Writing the row into the menu
@@ -872,6 +899,9 @@ final class create extends menu
 		// Initializing the project purpose
 		$this->purpose = project_purpose::{$robot->callbackQuery()->data};
 
+		// Clearing from deprecated parameters
+		$this->clear();
+
 		// Sending the popup notification
 		$robot->answerCallbackQuery(
 			text: $localization['project_purpose_' . $this->purpose?->name] ?? $this->purpose?->label(language: $language),
@@ -883,6 +913,220 @@ final class create extends menu
 
 		// Deleting the message buttons
 		$this->start(robot: $robot, new: false);
+	}
+
+	/**
+	 * Integrations
+	 * 
+	 * Generate the project integrations select menu
+	 *
+	 * @param telegram $robot The robot
+	 *
+	 * @return void
+	 */
+	public function integrations(telegram $robot): void
+	{
+		// Initializing the account language
+		$language = $robot->get('language') ?? LANGUAGE_DEFAULT;
+
+		// Initializing the account localization
+		$localization = $robot->get('localization') ?? new localization($language);
+
+		// Initializing the account
+		$account = $robot->get('account');
+
+		// Updating the message text
+		$this->menuText(
+			text: implode(
+				"\n\n",
+				[
+					"📡 *$localization->project_create_integrations_title*",
+					$localization->project_create_integrations_description,
+				]
+			),
+			opt: [
+				'parse_mode' => mode::MARKDOWN
+			]
+		);
+
+		// Deleting the message buttons
+		$this->clearButtons();
+
+		// Initializing the row
+		$row = [];
+
+		// Declaring the buffer of the row buttons length
+		$length = 0;
+
+		// Initializing the maximum amount of buttons in a row
+		$break = 4;
+
+		// Initializing buffer of integrations
+		$integrations = $this->purpose->integrations();
+
+		// Declaring the generated buttons registry
+		$generated = [];
+
+		foreach ($integrations as $index => $integration) {
+			// Iterating over integrations
+
+			if ($length + $integration->length() > $break && !empty($row)) {
+				// Reached the limit of buttons in a row
+
+				// Writing the row into the menu
+				$this->addButtonRow(...$row);
+
+				// Writing buttons into the generated buttons registry
+				$generated += $row;
+
+				// Reinitializing the row buttons length
+				$length = 0;
+
+				// Reinitializing the row
+				$row = [];
+			}
+
+			// Addition to row buttons length
+			$length += $integration->length();
+
+			// Initializing the target 
+			$target = $this->integrations[$integration->name] ?? null;
+
+			// Writing the integration button into the row
+			$row[] = button::make(
+				text: (isset($target) && $target ? '🔹' : '') . ($localization['project_integration_' . $integration->name] ?? $integration->label(language: $language)),
+				callback_data: "$integration->name@integration"
+			);
+
+			// Initializing the next integration
+			$next = $integrations[$index + 1] ?? null;
+
+			if ($next?->length() >= $break) {
+				// The next integration is the full-length button
+
+				// Writing the row into the menu
+				$this->addButtonRow(...$row);
+
+				// Writing buttons into the generated buttons registry
+				$generated += $row;
+
+				// Reinitializing the row
+				$row = [];
+
+				// Reinitializing the row buttons length
+				$length = 0;
+
+				// Initializing the target 
+				$target = $this->integrations[$integration->name] ?? null;
+
+				// Writing the button into the menu
+				$this->addButtonRow(button::make(
+					text: (isset($target) && $target ? '🔹' : '') . ($localization['project_integration_' . $integration->name] ?? $integration->label(language: $language)),
+					callback_data: "$integration->name@integration"
+				));
+
+				// Writing the button into the generated buttons registry
+				$generated[] = $next;
+			}
+		}
+
+		if (!empty($row) > 0) {
+			// The row was not writed 
+
+			// Writing the row into the menu
+			$this->addButtonRow(...$row);
+		}
+
+		// Writing the "back" button into the menu
+		$this->addButtonRow(button::make(
+			text: "🔏 $localization->project_create_button_back",
+			callback_data: '@continue'
+		));
+
+		// Deinitializing deprecated variables
+		unset($row, $limit, $length, $generated, $integrations, $integration);
+
+		// Updating the message and saving its text
+		$this->text = $this->showMenu()->text;
+	}
+
+	/**
+	 * Integration
+	 * 
+	 * Write the project integration
+	 *
+	 * @param telegram $robot The robot
+	 *
+	 * @return void
+	 */
+	public function integration(telegram $robot): void
+	{
+		// Initializing the account language
+		$language = $robot->get('language') ?? LANGUAGE_DEFAULT;
+
+		// Initializing the account localization
+		$localization = $robot->get('localization') ?? new localization($language);
+
+		// Initializing the integration
+		$integration = project_integration::{$robot->callbackQuery()->data};
+
+		if (isset($this->integrations[$integration->name])) {
+			// Enabled
+
+			// Disabling
+			unset($this->integrations[$integration->name]);
+		} else {
+			// Disabled
+
+			// Enabling
+			$this->integrations[$integration->name] = $integration;
+		};
+
+		// Sending the popup notification
+		$robot->answerCallbackQuery(
+			text: $localization['project_integrations_' . (isset($this->integrations[$integration->name]) ? 'enabled' : 'disabled')],
+			show_alert: false
+		);
+
+		// Deleting the message buttons
+		$this->integrations(robot: $robot);
+	}
+
+	/**
+	 * Clear
+	 * 
+	 * Deinitialize all deprecated parameters
+	 *
+	 * @return void
+	 */
+	public function clear(): void
+	{
+		// Initializing the project architecture purposes
+		$purposes = $this->architecture->purposes();
+
+		if (empty($purposes)) {
+			// The project architecture has no purposes
+
+			// Initializing the project purpose
+			$this->purpose = project_purpose::special;
+		} else if (count($purposes) === 1) {
+			// The project architecture has only 1 purpose
+
+			// Initializing the project purpose
+			$this->purpose = $purposes[0];
+		} else if (isset($this->purpose) && array_search($this->purpose, $purposes) !== false) {
+			// The project architrcture purpose is the same from deprecated purpose
+
+			// keep it
+		} else {
+			// The project can have other purposes
+
+			// Deinitializing the deprecated project purpose
+			unset($this->purpose);
+		}
+
+		// Deinitializing integrations
+		$this->integrations = [];
 	}
 
 	/**
@@ -908,6 +1152,17 @@ final class create extends menu
 
 			// Adding into the coefficient
 			$coefficient += $this->purpose->coefficient();
+		}
+
+		if (!empty($this->integrations)) {
+			// Initialized the project integrations
+
+			foreach ($this->integrations as $integration) {
+				// Iterating over the project integrations
+
+				// Adding into the coefficient
+				$coefficient += $integration->coefficient();
+			}
 		}
 
 		// Initializing start hours
