@@ -22,18 +22,21 @@ define('PROJECT_OPERATOR_URL', 'https://t.me/kodorvan?direct');
 define('PROJECT_REPOSITORY', REPOSITORY . '/' . PROJECT_CREATOR . '/' . PROJECT_NAME);
 define('PROJECT_REPOSITORY_LANGUAGE_ADD',  PROJECT_REPOSITORY . '/src/branch/stable/' . PROJECT_CREATOR . '/' . PROJECT_NAME . '/system/localizations');
 
+define('CURRENCY_DEFAULT', currency::usd);
+define('LANGUAGE_DEFAULT', language::en);
+
 define('PROJECT_CREATE_START_HOURS', 1);
 define('PROJECT_CREATE_START_COEFFICIENT', 0);
 define('PROJECT_CREATE_HOURS_ADDITIONAL', 0);
 define('PROJECT_CREATE_HOURS_MINIMAL', 4);
-define('PROJECT_CREATE_COST_HOUR_DEFAULT', 1200);
+define('PROJECT_CREATE_DAY_HOURS', 4);
+define('PROJECT_CREATE_DAY_ADDITIONAL', 1);
+define('PROJECT_CREATE_COST_HOUR_DEFAULT', 20);
+define('PROJECT_CREATE_COST_CURRENCY', CURRENCY_DEFAULT);
 
 define('PROJECT_CREATE_REQUEST_RECEIVERS', [
-
+	'-0000000000000'
 ]);
-
-define('CURRENCY_DEFAULT', currency::rub);
-define('LANGUAGE_DEFAULT', language::en);
 
 // Initializing default theme for the views templater
 define('THEME', 'default');

@@ -87,7 +87,7 @@ enum integration
 	{
 		// Exit (success)
 		return match ($this) {
-			static::one_c => 5,
+			static::one_c => 3,
 			static::bitrix24 => 3.5,
 			static::moy_sklad => 3,
 			static::telegram => 2,

@@ -72,6 +72,13 @@ final class create extends menu
 	public array $integrations = [];
 
 	/**
+	 * Cost
+	 *
+	 * @var int|float $cost Cost per hour
+	 */
+	public int|float $cost = PROJECT_CREATE_COST_HOUR_DEFAULT ?? 0;
+
+	/**
 	 * Start
 	 * 
 	 * Generate the project create menu and start the process
@@ -105,16 +112,23 @@ final class create extends menu
 		// Initializing the project development hours
 		$hours = $this->hours();
 
+		// Initializing the calculated offer
+		$offer = "*$localization->project_create_time:* $hours$localization->project_create_time_hours _\(" . ceil(($hours / PROJECT_CREATE_DAY_HOURS) + PROJECT_CREATE_DAY_ADDITIONAL) . "$localization->project_create_time_days\)_\n" . "*$localization->project_create_cost:* " . unmarkdown((string) ceil($hours * $this->cost)) . $account->currency->symbol();
+
 		// Generating the message text
 		$text = implode(
 			"\n\n",
-			[
-				"🏛 *$localization->project_create_title*",
-				/* $hours > 0 ? "*$localization->project_create_time* " . unmarkdown((string) $hours) . " $localization->hours" : $localization->project_create_description */
-				$new
-					? $localization->project_create_description
-					: "*$localization->project_create_time:* $hours$localization->project_create_time_hours"
-			]
+			array_filter(
+				[
+					"🏛 *$localization->project_create_title*",
+					$new
+						?	$localization->project_create_description
+						: $offer,
+					!$new || isset($this->cost)
+						? '⚠️ ' . $localization->project_create_cost_description
+						: null,
+				]
+			)
 		);
 
 		if ($this->text !== $text) {
@@ -197,7 +211,6 @@ final class create extends menu
 				if (match ($this->architecture) {
 					project_architecture::chat_robot,
 					project_architecture::parser,
-					project_architecture::crm,
 					project_architecture::site,
 					project_architecture::program,
 					project_architecture::complex => true,
@@ -215,7 +228,6 @@ final class create extends menu
 				}
 
 				if (match ($this->architecture) {
-					project_architecture::crm,
 					project_architecture::site,
 					project_architecture::program,
 					project_architecture::complex => true,
@@ -226,11 +238,7 @@ final class create extends menu
 					if (isset($this->interface)) {
 						// Initialized the project interface
 
-						if ($this->architecture === project_architecture::crm) {
-							// CRM
-
-							// site, mobile or desktop program
-						} else if ($this->architecture === project_architecture::program) {
+						if ($this->architecture === project_architecture::program) {
 							// Program
 
 							// mobile or desktop
@@ -238,11 +246,7 @@ final class create extends menu
 					} else {
 						// Not initialized the project interface
 
-						if ($this->architecture === project_architecture::crm) {
-							// CRM
-
-							// site, mobile or desktop program
-						} else if ($this->architecture === project_architecture::program) {
+						if ($this->architecture === project_architecture::program) {
 							// Program
 
 							// mobile or desktop
@@ -253,7 +257,6 @@ final class create extends menu
 				if (match ($this->architecture) {
 					project_architecture::chat_robot,
 					project_architecture::parser,
-					project_architecture::crm,
 					project_architecture::site,
 					project_architecture::program,
 					project_architecture::complex => true,
@@ -273,7 +276,6 @@ final class create extends menu
 				if (match ($this->architecture) {
 					project_architecture::chat_robot,
 					project_architecture::parser,
-					project_architecture::crm,
 					project_architecture::site,
 					project_architecture::program,
 					project_architecture::complex => true,
@@ -291,7 +293,6 @@ final class create extends menu
 				}
 
 				if (match ($this->architecture) {
-					project_architecture::crm,
 					project_architecture::site,
 					project_architecture::program,
 					project_architecture::complex => true,
@@ -309,7 +310,6 @@ final class create extends menu
 				}
 
 				if (match ($this->architecture) {
-					project_architecture::crm,
 					project_architecture::site,
 					project_architecture::program,
 					project_architecture::complex => true,
@@ -329,7 +329,6 @@ final class create extends menu
 				if (match ($this->architecture) {
 					project_architecture::chat_robot,
 					project_architecture::parser,
-					project_architecture::crm,
 					project_architecture::site,
 					project_architecture::program,
 					project_architecture::complex => true,
@@ -348,7 +347,6 @@ final class create extends menu
 
 				if (match ($this->architecture) {
 					project_architecture::chat_robot,
-					project_architecture::crm,
 					project_architecture::site,
 					project_architecture::program,
 					project_architecture::complex => true,
@@ -368,7 +366,6 @@ final class create extends menu
 				if (match ($this->architecture) {
 					project_architecture::chat_robot,
 					project_architecture::parser,
-					project_architecture::crm,
 					project_architecture::site,
 					project_architecture::complex => true,
 					default => false
@@ -386,7 +383,6 @@ final class create extends menu
 
 				if (match ($this->architecture) {
 					project_architecture::chat_robot,
-					project_architecture::crm,
 					project_architecture::site,
 					project_architecture::program,
 					project_architecture::complex => true,
@@ -405,7 +401,6 @@ final class create extends menu
 
 				if (match ($this->architecture) {
 					project_architecture::chat_robot,
-					project_architecture::crm,
 					project_architecture::site,
 					project_architecture::complex => true,
 					default => false
@@ -424,7 +419,6 @@ final class create extends menu
 				if (match ($this->architecture) {
 					project_architecture::chat_robot,
 					project_architecture::parser,
-					project_architecture::crm,
 					project_architecture::site,
 					project_architecture::program,
 					project_architecture::complex => true,
@@ -443,7 +437,6 @@ final class create extends menu
 
 				if (match ($this->architecture) {
 					project_architecture::chat_robot,
-					project_architecture::crm,
 					project_architecture::site,
 					project_architecture::program,
 					project_architecture::complex => true,
@@ -463,7 +456,6 @@ final class create extends menu
 				if (match ($this->architecture) {
 					project_architecture::chat_robot,
 					project_architecture::parser,
-					project_architecture::crm,
 					project_architecture::site,
 					project_architecture::program,
 					project_architecture::complex => true,
@@ -516,13 +508,32 @@ final class create extends menu
 		if (!$new) {
 			// The project development hours was calculated
 
-			// Writing the project architecture button
-			$this->addButtonRow(
-				button::make(
-					text: "☑️ $localization->project_create_button_request",
-					callback_data: '@request'
-				)
-			);
+
+			if (isset($this->cost)) {
+				// Initialized the project cost per hour
+
+				// Writing the project buttons
+				$this->addButtonRow(
+					button::make(
+						text: '⚖️ ' . "$localization->project_create_button_cost_per_hour: $this->cost" . $account->currency->symbol(),
+						callback_data: '@cost'
+					),
+					button::make(
+						text: "📦 $localization->project_create_button_request",
+						callback_data: '@request'
+					)
+				);
+			} else {
+				// Not initialized the project cost per hour
+
+				// Writing the project cost per hour button
+				$this->addButtonRow(
+					button::make(
+						text: '⚖️ ' . $localization->project_create_button_cost_per_hour,
+						callback_data: '@cost'
+					)
+				);
+			}
 		}
 
 		// Updating the message and saving its text
@@ -994,7 +1005,7 @@ final class create extends menu
 
 			// Writing the integration button into the row
 			$row[] = button::make(
-				text: (isset($target) && $target ? '🔹' : '') . ($localization['project_integration_' . $integration->name] ?? $integration->label(language: $language)),
+				text: (isset($target) && $target ? '🔘 ' : '') . ($localization['project_integration_' . $integration->name] ?? $integration->label(language: $language)),
 				callback_data: "$integration->name@integration"
 			);
 
@@ -1093,6 +1104,48 @@ final class create extends menu
 	}
 
 	/**
+	 * Cost
+	 * 
+	 * Write the project cost per hour
+	 *
+	 * @param telegram $robot The robot
+	 *
+	 * @return void
+	 */
+	public function cost(telegram $robot): void
+	{
+		// Initializing the account language
+		$language = $robot->get('language') ?? LANGUAGE_DEFAULT;
+
+		// Initializing the account localization
+		$localization = $robot->get('localization') ?? new localization($language);
+
+		// Initializing the integration
+		$integration = project_integration::{$robot->callbackQuery()->data};
+
+		if (isset($this->integrations[$integration->name])) {
+			// Enabled
+
+			// Disabling
+			unset($this->integrations[$integration->name]);
+		} else {
+			// Disabled
+
+			// Enabling
+			$this->integrations[$integration->name] = $integration;
+		};
+
+		// Sending the popup notification
+		$robot->answerCallbackQuery(
+			text: $localization['project_integrations_' . (isset($this->integrations[$integration->name]) ? 'enabled' : 'disabled')],
+			show_alert: false
+		);
+
+		// Deleting the message buttons
+		$this->integrations(robot: $robot);
+	}
+
+	/**
 	 * Clear
 	 * 
 	 * Deinitialize all deprecated parameters
@@ -1134,37 +1187,12 @@ final class create extends menu
 	 * 
 	 * Calculate the project development hours
 	 *
+	 * @param bool $absolute Summary all coefficients and then multiply?
+	 *
 	 * @return int|float The project development hours
 	 */
-	public function hours(): int|float
-	{		// Declaring coefficient
-		$coefficient = PROJECT_CREATE_START_COEFFICIENT ?? 0;
-
-		if (isset($this->architecture)) {
-			// Initialized the project architecture
-
-			// Adding into the coefficient
-			$coefficient += $this->architecture->coefficient();
-		}
-
-		if (isset($this->purpose)) {
-			// Initialized the project purpose
-
-			// Adding into the coefficient
-			$coefficient += $this->purpose->coefficient();
-		}
-
-		if (!empty($this->integrations)) {
-			// Initialized the project integrations
-
-			foreach ($this->integrations as $integration) {
-				// Iterating over the project integrations
-
-				// Adding into the coefficient
-				$coefficient += $integration->coefficient();
-			}
-		}
-
+	public function hours(bool $absolute = false): int|float
+	{
 		// Initializing start hours
 		$start = PROJECT_CREATE_START_HOURS ?? 1;
 		$start < 1 and $start = 1;
@@ -1172,11 +1200,79 @@ final class create extends menu
 		// Initializing additional hours
 		$additional = PROJECT_CREATE_HOURS_ADDITIONAL ?? 0;
 
-		// Calculating the development hours
-		$hours = $start * $coefficient + $additional;
+		if ($absolute) {
+			// The absolute coefficient
 
-		// Calculating and exit (success)
-		return ceil(max($hours, PROJECT_CREATE_HOURS_MINIMAL));
+			// Declaring coefficient
+			$coefficient = PROJECT_CREATE_START_COEFFICIENT ?? 0;
+
+			if (isset($this->architecture)) {
+				// Initialized the project architecture
+
+				// Adding into the coefficient
+				$coefficient += $this->architecture->coefficient() ?? 0;
+			}
+
+			if (isset($this->purpose)) {
+				// Initialized the project purpose
+
+				// Adding into the coefficient
+				$coefficient += $this->purpose->coefficient() ?? 0;
+			}
+
+			if (!empty($this->integrations)) {
+				// Initialized the project integrations
+
+				foreach ($this->integrations as $integration) {
+					// Iterating over the project integrations
+
+					// Adding into the coefficient
+					$coefficient += $integration->coefficient() ?? 0;
+				}
+			}
+
+			// Calculating the development hours
+			$hours = $start * $coefficient + $additional;
+
+			// Calculating and exit (success)
+			return ceil(max($hours, PROJECT_CREATE_HOURS_MINIMAL));
+		} else {
+			// The relative coefficient
+
+			// Initializing the development hours
+			$hours = $start;
+
+			if (isset($this->architecture)) {
+				// Initialized the project architecture
+
+				// Adding into the coefficient
+				$hours *= $this->architecture->coefficient() ?? 1;
+			}
+
+			if (isset($this->purpose)) {
+				// Initialized the project purpose
+
+				// Adding into the coefficient
+				$hours *= $this->purpose->coefficient() ?? 1;
+			}
+
+			if (!empty($this->integrations)) {
+				// Initialized the project integrations
+
+				foreach ($this->integrations as $integration) {
+					// Iterating over the project integrations
+
+					// Adding into the coefficient
+					$hours *= $integration->coefficient() ?? 1;
+				}
+			}
+
+			//
+			$hours += $additional;
+
+			// Calculating and exit (success)
+			return ceil(max($hours, PROJECT_CREATE_HOURS_MINIMAL));
+		}
 	}
 
 	/**

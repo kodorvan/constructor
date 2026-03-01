@@ -28,16 +28,16 @@ enum purpose
 	case crm;
 	case landing;
 	case marketplace;
-	case charity;
+	/* case charity; */
 	case search;
 	case calculate;
-	case logic;
+	/* case logic; */
 	case game;
 
-	case workers;
+	/* case workers;
 	case tools;
 	case objects;
-	case events;
+	case events; */
 
 	case special;
 
@@ -83,10 +83,10 @@ enum purpose
 				language::en => 'Marketplace',
 				language::ru => 'Маркетплейс'
 			},
-			static::charity => match ($language) {
+			/* static::charity => match ($language) {
 				language::en => 'Charity',
 				language::ru => 'Благотворительность'
-			},
+			}, */
 			static::search => match ($language) {
 				language::en => 'Search',
 				language::ru => 'Поиск'
@@ -95,15 +95,15 @@ enum purpose
 				language::en => 'Calculate',
 				language::ru => 'Расчёты'
 			},
-			static::logic => match ($language) {
+			/* static::logic => match ($language) {
 				language::en => 'Logic',
 				language::ru => 'Логика'
-			},
+			}, */
 			static::game => match ($language) {
 				language::en => 'Game',
 				language::ru => 'Игра'
 			},
-			static::workers => match ($language) {
+			/* static::workers => match ($language) {
 				language::en => 'Workes',
 				language::ru => 'Рабочие'
 			},
@@ -118,7 +118,7 @@ enum purpose
 			static::events => match ($language) {
 				language::en => 'Events',
 				language::ru => 'События'
-			},
+			}, */
 			static::special => match ($language) {
 				language::en => 'Special',
 				language::ru => 'Особенный'
@@ -164,18 +164,18 @@ enum purpose
 				integration::moy_sklad,
 				integration::excel
 			],
-			static::charity => [
+			/* static::charity => [
 				integration::one_c,
 				integration::moy_sklad,
 				integration::excel
-			],
+			], */
 			static::search => [],
 			static::calculate => [
 				integration::one_c,
 				integration::moy_sklad,
 				integration::excel
 			],
-			static::logic => [],
+			/* static::logic => [],
 			static::tools => [
 				integration::one_c,
 				integration::moy_sklad,
@@ -200,7 +200,7 @@ enum purpose
 				integration::one_c,
 				integration::moy_sklad,
 				integration::excel
-			],
+			], */
 			default => []
 		};
 	}
@@ -222,14 +222,14 @@ enum purpose
 			static::crm => 1,
 			static::landing => 1,
 			static::marketplace => 2,
-			static::charity => 2,
+			/* static::charity => 2, */
 			static::search => 2,
 			static::calculate => 2,
-			static::logic => 1,
+			/* static::logic => 1,
 			static::tools => 1,
 			static::workers => 1,
 			static::objects => 1,
-			static::events => 1,
+			static::events => 1, */
 			static::special => 4,
 			default => 1
 		};
@@ -244,22 +244,22 @@ enum purpose
 	{
 		// Exit (success)
 		return match ($this) {
-			static::funnel => 1.4,
+			static::funnel => 2,
 			static::contact => 1.1,
-			static::neural_network => 2,
+			static::neural_network => 4,
 			static::game => 3,
 			static::gallery => 1,
-			static::crm => 3,
-			static::landing => 1.2,
-			static::marketplace => 2,
-			static::charity => 0.8,
+			static::crm => 6,
+			static::landing => 1.5,
+			static::marketplace => 8,
+			/* static::charity => 0.8, */
 			static::search => 1,
-			static::calculate => 1.1,
-			static::logic => 1,
+			static::calculate => 2,
+			/* static::logic => 1,
 			static::tools => 1,
 			static::workers => 1.2,
 			static::objects => 1,
-			static::events => 1.5,
+			static::events => 1.5, */
 			static::special => 2,
 			default => 1
 		};

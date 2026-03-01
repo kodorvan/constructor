@@ -8,6 +8,7 @@ namespace kodorvan\constructor\models;
 use kodorvan\constructor\models\core,
 	kodorvan\constructor\models\authorizations,
 	kodorvan\constructor\models\settings,
+	kodorvan\constructor\models\worker,
 	kodorvan\constructor\models\project,
 	kodorvan\constructor\models\project\enumerations\type as project_type,
 	kodorvan\constructor\models\project\enumerations\status as project_status;
@@ -66,6 +67,13 @@ final class account extends core implements record_interface
 	public protected(set) database $database;
 
 	/**
+	 * Serialized
+	 *
+	 * @var bool $serialized Is the implementator object serialized?
+	 */
+	private bool $serialized = true;
+
+	/**
 	 * Constructor
 	 *
 	 * @method record|null $record The record
@@ -84,6 +92,7 @@ final class account extends core implements record_interface
 				new column('name_first', type::string, ['length' => 64]),
 				new column('name_second', type::string, ['length' => 64]),
 				new column('language', type::string, ['length' => 2]),
+				new column('currency', type::string, ['length' => 3]),
 				new column('robot', type::char),
 				/* new column('', type::), */
 				new column('active', type::char),
@@ -215,6 +224,7 @@ final class account extends core implements record_interface
 			name_second: (string) $telegram->last_name,
 			domain: (string) $telegram->username,
 			language: (string) $telegram->language_code,
+			currency: CURRENCY_DEFAULT,
 			robot: (bool) $telegram->is_bot
 		);
 
@@ -256,6 +266,7 @@ final class account extends core implements record_interface
 	 * @param string $name_second
 	 * @param string $domain
 	 * @param language|string $language
+	 * @param currency|string $currency
 	 * @param bool $robot Is a robot?
 	 * @param bool $active Is the record active?
 	 *
@@ -267,6 +278,7 @@ final class account extends core implements record_interface
 		string $name_first = '',
 		string $name_second = '',
 		language|string $language = LANGUAGE_DEFAULT ?? language::en,
+		currency|string $currency = CURRENCY_DEFAULT ?? currency::usd,
 		bool $robot = false,
 		bool $active = true,
 	): record|false {
@@ -278,6 +290,7 @@ final class account extends core implements record_interface
 			$name_first,
 			$name_second,
 			$language instanceof language ? $language->name : (string) $language,
+			$currency instanceof currency ? $currency->name : (string) $currency,
 			(int) $robot,
 			/* */
 			(int) $active,
@@ -299,10 +312,21 @@ final class account extends core implements record_interface
 	 */
 	public function serialize(): self
 	{
+		if ($this->serialized) {
+			// The record implementor is serialized
+
+			// Exit (fail)
+			throw new exception_runtime('The record implementor is already serialized');
+		}
+
 		// Serializing the record parameters
 		$this->record->language = $this->record->language->name;
+		$this->record->currency = $this->record->currency->name;
 		$this->record->robot = (int) $this->record->robot;
 		$this->record->active = (int) $this->record->active;
+
+		// Writing the status of serializing
+		$this->serialized = true;
 
 		// Exit (success)
 		return $this;
@@ -315,10 +339,21 @@ final class account extends core implements record_interface
 	 */
 	public function deserialize(): self
 	{
+		if (!$this->serialized) {
+			// The record implementor is deserialized
+
+			// Exit (fail)
+			throw new exception_runtime('The record implementor is already deserialized');
+		}
+
 		// Deserializing the record parameters
 		$this->record->language = language::{$this->record->language} ?? LANGUAGE_DEFAULT ?? language::en;
+		$this->record->currency = currency::{$this->record->currency} ?? CURRENCY_DEFAULT ?? currency::usd;
 		$this->record->robot = (bool) $this->record->robot;
 		$this->record->active = (bool) $this->record->active;
+
+		// Writing the status of serializing
+		$this->serialized = false;
 
 		// Exit (success)
 		return $this;
@@ -341,6 +376,29 @@ final class account extends core implements record_interface
 
 			// Exit (success)
 			return $authorizations;
+		}
+
+		// Exit (fail)
+		return null;
+	}
+
+	/**
+	 * Worker
+	 *
+	 * Search for the account worker
+	 *
+	 * @return worker|null The account worker
+	 */
+	public function worker(): ?worker
+	{
+		// Search for the account worker
+		$worker = new worker()->read(filter: fn(record $record) => $record->active === 1 && $record->account === $this->identifier);
+
+		if ($worker instanceof worker) {
+			// Found the account worker
+
+			// Exit (success)
+			return $worker;
 		}
 
 		// Exit (fail)

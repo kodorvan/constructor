@@ -31,10 +31,8 @@ enum architecture
 	case chat_robot;
 	case parser;
 	case script;
-	case crm;
 	case site;
 	case program;
-		/* case calculator; */
 
 	case complex;
 
@@ -61,9 +59,6 @@ enum architecture
 				language::en => 'Script',
 				language::ru => 'Скрипт'
 			},
-			static::crm => match ($language) {
-				default => 'CRM'
-			},
 			static::site => match ($language) {
 				language::en => 'Site',
 				language::ru => 'Сайт'
@@ -88,13 +83,12 @@ enum architecture
 	{
 		// Exit (success)
 		return match ($this) {
-			static::chat_robot => 2,
+			static::chat_robot => 1,
 			static::parser => 1,
 			static::script => 1,
-			static::crm => 1,
 			static::site => 1,
 			static::program => 1,
-			static::complex => 2,
+			static::complex => 4,
 			default => 1
 		};
 	}
@@ -125,20 +119,12 @@ enum architecture
 				purpose::calculate,
 				purpose::landing,
 				purpose::marketplace,
-				purpose::events,
-				purpose::charity
 			],
 			static::parser => [
 				purpose::search
 			],
 			static::script => [
 				purpose::logic
-			],
-			static::crm => [
-				purpose::workers,
-				purpose::tools,
-				purpose::objects,
-				purpose::events
 			],
 			static::site => [
 				purpose::funnel,
@@ -149,22 +135,12 @@ enum architecture
 				purpose::calculate,
 				purpose::landing,
 				purpose::marketplace,
-				purpose::workers,
-				purpose::tools,
-				purpose::objects,
-				purpose::events,
-				purpose::charity
 			],
 			static::program => [
 				purpose::neural_network,
 				purpose::crm,
 				purpose::calculate,
 				purpose::marketplace,
-				purpose::workers,
-				purpose::tools,
-				purpose::objects,
-				purpose::events,
-				purpose::charity
 			],
 			default => []
 		};
@@ -231,10 +207,6 @@ enum architecture
 				currency::usd => 10,
 				currency::rub => 1000
 			},
-			static::crm => match ($currency) {
-				currency::usd => 100,
-				currency::rub => 8000
-			},
 			static::site => match ($currency) {
 				currency::usd => 50,
 				currency::rub => 5000
@@ -262,7 +234,6 @@ enum architecture
 			static::chat_robot => 3,
 			static::parser => 2,
 			static::script => 1,
-			static::crm => 6,
 			static::site => 3,
 			static::program => 4,
 			static::complex => 5,

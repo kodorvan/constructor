@@ -52,6 +52,13 @@ final class settings extends core implements record_interface
 	public protected(set) database $database;
 
 	/**
+	 * Serialized
+	 *
+	 * @var bool $serialized Is the implementator object serialized?
+	 */
+	private bool $serialized = true;
+
+	/**
 	 * Constructor
 	 *
 	 * @method record|null $record The record
@@ -111,8 +118,18 @@ final class settings extends core implements record_interface
 	 */
 	public function serialize(): self
 	{
+		if ($this->serialized) {
+			// The record implementor is serialized
+
+			// Exit (fail)
+			throw new exception_runtime('The record implementor is already serialized');
+		}
+
 		// Serializing the record parameters
 		$this->record->active = (int) $this->record->active;
+
+		// Writing the status of serializing
+		$this->serialized = true;
 
 		// Exit (success)
 		return $this;
@@ -125,8 +142,18 @@ final class settings extends core implements record_interface
 	 */
 	public function deserialize(): self
 	{
+		if (!$this->serialized) {
+			// The record implementor is deserialized
+
+			// Exit (fail)
+			throw new exception_runtime('The record implementor is already deserialized');
+		}
+
 		// Deserializing the record parameters
 		$this->record->active = (bool) $this->record->active;
+
+		// Writing the status of serializing
+		$this->serialized = false;
 
 		// Exit (success)
 		return $this;
