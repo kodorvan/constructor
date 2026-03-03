@@ -79,6 +79,15 @@ final class create extends menu
 	public int|float $cost = PROJECT_CREATE_COST_HOUR_DEFAULT ?? 0;
 
 	/**
+	 * Messages
+	 *
+	 * Registry of messages for cleaning
+	 *
+	 * @var array $messages
+	 */
+	public array $messages = [];
+
+	/**
 	 * Start
 	 * 
 	 * Generate the project create menu and start the process
@@ -515,8 +524,8 @@ final class create extends menu
 				// Writing the project buttons
 				$this->addButtonRow(
 					button::make(
-						text: '⚖️ ' . "$localization->project_create_button_cost_per_hour: $this->cost" . $account->currency->symbol(),
-						callback_data: '@cost'
+						text: '🛠 ' . "$localization->project_create_button_cost_per_hour: $this->cost" . $account->currency->symbol(),
+						callback_data: 'set@cost'
 					),
 					button::make(
 						text: "📦 $localization->project_create_button_request",
@@ -529,8 +538,8 @@ final class create extends menu
 				// Writing the project cost per hour button
 				$this->addButtonRow(
 					button::make(
-						text: '⚖️ ' . $localization->project_create_button_cost_per_hour,
-						callback_data: '@cost'
+						text: '🛠 ' . $localization->project_create_button_cost_per_hour,
+						callback_data: 'set@cost'
 					)
 				);
 			}
@@ -551,7 +560,7 @@ final class create extends menu
 	 */
 	public function continue(telegram $robot): void
 	{
-		// Continuing the process
+		// Sending the process main menu
 		$this->start(robot: $robot, new: false);
 	}
 
@@ -580,10 +589,12 @@ final class create extends menu
 		$this->menuText(
 			text: implode(
 				"\n\n",
-				[
-					"⚙️ *$localization->project_create_architectures_title*",
-					$localization->project_create_architectures_description,
-				]
+				array_filter(
+					[
+						"⚙️ *$localization->project_create_architectures_title*",
+						$localization->project_create_architectures_description,
+					]
+				)
 			),
 			opt: [
 				'parse_mode' => mode::MARKDOWN
@@ -732,7 +743,7 @@ final class create extends menu
 		// Deleting the message buttons
 		$this->clearButtons();
 
-		// Deleting the message buttons
+		// Sending the process main menu
 		$this->start(robot: $robot, new: false);
 	}
 
@@ -760,10 +771,10 @@ final class create extends menu
 		$this->menuText(
 			text: implode(
 				"\n\n",
-				[
+				array_filter([
 					"🛠 *$localization->project_create_purposes_title*",
 					$localization->project_create_purposes_description,
-				]
+				])
 			),
 			opt: [
 				'parse_mode' => mode::MARKDOWN
@@ -922,7 +933,7 @@ final class create extends menu
 		// Deleting the message buttons
 		$this->clearButtons();
 
-		// Deleting the message buttons
+		// Sending the process main menu
 		$this->start(robot: $robot, new: false);
 	}
 
@@ -950,10 +961,10 @@ final class create extends menu
 		$this->menuText(
 			text: implode(
 				"\n\n",
-				[
+				array_filter([
 					"📡 *$localization->project_create_integrations_title*",
 					$localization->project_create_integrations_description,
-				]
+				])
 			),
 			opt: [
 				'parse_mode' => mode::MARKDOWN
@@ -1120,29 +1131,80 @@ final class create extends menu
 		// Initializing the account localization
 		$localization = $robot->get('localization') ?? new localization($language);
 
-		// Initializing the integration
-		$integration = project_integration::{$robot->callbackQuery()->data};
+		// Initializing the user input message
+		$message = $robot->message();
 
-		if (isset($this->integrations[$integration->name])) {
-			// Enabled
+		// Initializing the user input message text
+		$text = $message?->text;
 
-			// Disabling
-			unset($this->integrations[$integration->name]);
+		// Initializing the message data
+		$data = $robot->callbackQuery()?->data;
+
+		if (!empty($text) && $data !== 'set') {
+			// Not empty text
+
+			// Writing the user input message into the messages registry
+			$this->messages[] = $message;
+
+			// Initializing the text length
+			$length = mb_strlen($text);
+
+			if ($length > 0) {
+				// More than 2 symbols text
+
+				// Sanitizing
+				$float = filter_var($text, FILTER_SANITIZE_NUMBER_FLOAT);
+
+				if (filter_var($float, FILTER_VALIDATE_FLOAT)) {
+					// Number
+
+					// Writing the cost
+					$this->cost = (float)$float;
+
+					foreach ($this->messages as $message) {
+						// Iterating over messages registry
+
+						// Deleting the message
+						$message->delete();
+					}
+
+					// Deinitializing the messages registry
+					$this->messages = [];
+
+					// Sending the process main menu
+					$this->start(robot: $robot, new: false);
+				}
+			} else {
+				// Less or equal than 2 symbols text
+
+			}
 		} else {
-			// Disabled
+			// Empty text
 
-			// Enabling
-			$this->integrations[$integration->name] = $integration;
-		};
+			// Sending the message
+			$this->messages[] = $robot->sendMessage(
+				text: implode(
+					"\n\n",
+					array_filter(
+						[
+							"✏️ *$localization->project_create_request_cost_title*",
+							$localization->project_create_request_cost_description,
+							sprintf(
+								$localization->project_create_request_cost_default,
+								PROJECT_CREATE_COST_HOUR_DEFAULT,
+								CURRENCY_DEFAULT->symbol() ?? ''
+							),
+							"⚠️ $localization->project_create_request_cost_warning"
+						]
+					)
+				),
+				parse_mode: mode::MARKDOWN,
+				disable_notification: true,
+			);
 
-		// Sending the popup notification
-		$robot->answerCallbackQuery(
-			text: $localization['project_integrations_' . (isset($this->integrations[$integration->name]) ? 'enabled' : 'disabled')],
-			show_alert: false
-		);
-
-		// Deleting the message buttons
-		$this->integrations(robot: $robot);
+			// Waiting for the user input
+			$this->next('cost');
+		}
 	}
 
 	/**
@@ -1303,16 +1365,18 @@ final class create extends menu
 		// Generating the message text
 		$text = implode(
 			"\n\n",
-			[
-				'*' . unmarkdown(sprintf("💸 $localization->project_request_title", $sex ?? 0)) . '*',
-				<<<TXT
+			array_filter(
+				[
+					'*' . unmarkdown(sprintf("💸 $localization->project_request_title", $sex ?? 0)) . '*',
+					<<<TXT
 				*$localization->project_request_architecture:* $architecture
 				*$localization->project_request_purpose:* $purpose
 				TXT,
-				<<<TXT
+					<<<TXT
         *$localization->project_request_hours:* $hours
         TXT
-			]
+				]
+			)
 		);
 
 		// Initializing the keyboard
