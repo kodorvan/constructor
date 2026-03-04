@@ -1143,14 +1143,18 @@ final class create extends menu
 		if (!empty($text) && $data !== 'set') {
 			// Not empty text
 
+			// Initializing the message filters
+			$minimum = 2;
+			$maximum = 5;
+
 			// Writing the user input message into the messages registry
 			$this->messages[] = $message;
 
 			// Initializing the text length
 			$length = mb_strlen($text);
 
-			if ($length > 0) {
-				// More than 2 symbols text
+			if ($length >= $minimum) {
+				// More than minimum amount of symbols
 
 				// Sanitizing
 				$float = filter_var($text, FILTER_SANITIZE_NUMBER_FLOAT);
@@ -1159,48 +1163,97 @@ final class create extends menu
 					// Number
 
 					// Writing the cost
-					$this->cost = (float)$float;
+					$this->cost = (float) $float;
 
-					foreach ($this->messages as $message) {
-						// Iterating over messages registry
+					try {
+						foreach ($this->messages as $message) {
+							// Iterating over messages registry
 
-						// Deleting the message
-						$message->delete();
+							// Deleting the message
+							$message->delete();
+
+							// Waiting just for rofls
+							usleep(200);
+						}
+					} catch (exception $exception) {
+						// Sending into the errors output buffer
+						error_log($exception->getMessage());
+					} finally {
+						// Deinitializing the messages registry
+						$this->messages = [];
 					}
-
-					// Deinitializing the messages registry
-					$this->messages = [];
 
 					// Sending the process main menu
 					$this->start(robot: $robot, new: false);
+				} else {
+					// Not a number
+
+					// Sending the message
+					$this->messages[] = $robot->sendMessage(
+						text: implode(
+							"\n\n",
+							array_filter(
+								[
+									"⚠️ $localization->project_create_request_cost_error_not_a_number",
+								]
+							)
+						),
+						parse_mode: mode::MARKDOWN,
+						disable_notification: true,
+					);
+
+					// Waiting for the user input
+					$this->next('cost');
 				}
 			} else {
-				// Less or equal than 2 symbols text
+				// Less or equal than minimum amount of symbols
 
+				// Sending the message
+				$this->messages[] = $robot->sendMessage(
+					text: implode(
+						"\n\n",
+						array_filter(
+							[
+								sprintf(
+									"⚠️ $localization->project_create_request_cost_error_distance",
+									$minimum,
+									$maximum
+								)
+							]
+						)
+					),
+					parse_mode: mode::MARKDOWN,
+					disable_notification: true,
+				);
+
+				// Waiting for the user input
+				$this->next('cost');
 			}
 		} else {
 			// Empty text
 
-			// Sending the message
-			$this->messages[] = $robot->sendMessage(
-				text: implode(
-					"\n\n",
-					array_filter(
-						[
-							"✏️ *$localization->project_create_request_cost_title*",
-							$localization->project_create_request_cost_description,
-							sprintf(
-								$localization->project_create_request_cost_default,
-								PROJECT_CREATE_COST_HOUR_DEFAULT,
-								CURRENCY_DEFAULT->symbol() ?? ''
-							),
-							"⚠️ $localization->project_create_request_cost_warning"
-						]
-					)
-				),
-				parse_mode: mode::MARKDOWN,
-				disable_notification: true,
-			);
+			// Sending the message and reinitializing the messages registry
+			$this->messages = [
+				$robot->sendMessage(
+					text: implode(
+						"\n\n",
+						array_filter(
+							[
+								"✏️ *$localization->project_create_request_cost_title*",
+								$localization->project_create_request_cost_description,
+								sprintf(
+									$localization->project_create_request_cost_default,
+									PROJECT_CREATE_COST_HOUR_DEFAULT,
+									CURRENCY_DEFAULT->symbol() ?? ''
+								),
+								"⚠️ $localization->project_create_request_cost_warning"
+							]
+						)
+					),
+					parse_mode: mode::MARKDOWN,
+					disable_notification: true,
+				)
+			];
 
 			// Waiting for the user input
 			$this->next('cost');
