@@ -12,6 +12,7 @@ use kodorvan\constructor\models\core,
 	kodorvan\constructor\models\project\enumerations\architecture as project_architecture,
 	kodorvan\constructor\models\project\enumerations\purpose as project_purpose,
 	kodorvan\constructor\models\project\enumerations\integration as project_integration,
+	kodorvan\constructor\models\worker\enumerations\type as worker_type,
 	kodorvan\constructor\models\telegram\processes\language\select as process_language_select;
 
 // Library for languages support
@@ -88,6 +89,15 @@ final class create extends menu
 	public array $messages = [];
 
 	/**
+	 * Workers
+	 *
+	 * Registry of project developments workers
+	 *
+	 * @var array $workers
+	 */
+	public array $workers = [];
+
+	/**
 	 * Start
 	 * 
 	 * Generate the project create menu and start the process
@@ -100,7 +110,7 @@ final class create extends menu
 	public function start(telegram $robot, bool $new = true): void
 	{
 		if ($new) {
-			// Requested creating a new process 
+			// New
 
 			// Ending the conversation
 			$robot->endConversation();
@@ -118,29 +128,67 @@ final class create extends menu
 		// Initializing the account
 		$account = $robot->get('account');
 
-		// Initializing the project development hours
-		$hours = $this->hours();
+		// Title
+		$title = "🏛 *$localization->project_create_title*";
 
-		// Initializing the calculated offer
-		$offer = "*$localization->project_create_time:* $hours$localization->project_create_time_hours _\(" . ceil(($hours / PROJECT_CREATE_DAY_HOURS) + PROJECT_CREATE_DAY_ADDITIONAL) . "$localization->project_create_time_days\)_\n" . "*$localization->project_create_cost:* " . unmarkdown((string) ceil($hours * $this->cost)) . $account->currency->symbol();
+		// Declaring the message generation variables
+		$costs = $warnings = [];
+		$welcome = $time = null;
+
+		if ($new) {
+			// New
+
+			// Writing the project create message content
+			$welcome = $localization->project_create_description;
+		} else {
+			// Continue
+
+			// Hours
+			$hours = $this->hours();
+
+			// Days
+			$days = ceil(($hours / PROJECT_CREATE_DAY_HOURS) + PROJECT_CREATE_DAY_ADDITIONAL);
+
+			// Writing the project create message content (hours and days)
+			$time = "*$localization->project_create_time:* $hours$localization->project_create_time_hours _\($days$localization->project_create_time_days\)_";
+
+			if (isset($this->cost)) {
+				// Initialized the project development cost
+
+				// Full cost
+				$full = ceil($hours * $this->cost);
+
+				// Prepayment
+				$prepayment = ceil($full * (PROJECT_CREATE_COST_PREPAYMENT_PERCENTS / 100));
+
+				// Writing the project create message full cost
+				$costs['full'] = "*$localization->project_create_cost:* $full" . $account->currency->symbol();
+
+				// Writing the project create message cost prepayment
+				$costs['prepayment'] = "*$localization->project_create_cost_prepayment:* $prepayment" . $account->currency->symbol() . ' _\(' . PROJECT_CREATE_COST_PREPAYMENT_PERCENTS . '%\)_';
+
+				// Writing the project create message cost warning
+				$warnings['cost'] = "⚠️ " . $localization->project_create_warning_cost;
+			}
+		}
 
 		// Generating the message text
 		$text = implode(
 			"\n\n",
 			array_filter(
 				[
-					"🏛 *$localization->project_create_title*",
-					$new
-						?	$localization->project_create_description
-						: $offer,
-					!$new || isset($this->cost)
-						? '⚠️ ' . $localization->project_create_cost_description
-						: null,
+					$title,
+					$welcome,
+					$time,
+					implode("\n", $costs),
+					implode("\n", $warnings),
 				]
 			)
 		);
 
 		if ($this->text !== $text) {
+			// The message text was changed
+
 			$this->menuText(
 				text: $text,
 				opt: [
@@ -517,32 +565,32 @@ final class create extends menu
 		if (!$new) {
 			// The project development hours was calculated
 
+			// Cost
+			$cost = '🛠 ' . (isset($this->cost) ? "$localization->project_create_button_cost_per_hour: $this->cost" . $account->currency->symbol() : $localization->project_create_button_cost_per_hour);
 
-			if (isset($this->cost)) {
-				// Initialized the project cost per hour
+			// Initializing the project development workers
+			if (empty($this->workers)) $this->workers = $this->architecture?->workers() ?? [];
 
-				// Writing the project buttons
-				$this->addButtonRow(
-					button::make(
-						text: '🛠 ' . "$localization->project_create_button_cost_per_hour: $this->cost" . $account->currency->symbol(),
-						callback_data: 'set@cost'
-					),
-					button::make(
-						text: "📦 $localization->project_create_button_request",
-						callback_data: '@request'
-					)
-				);
-			} else {
-				// Not initialized the project cost per hour
+			// Writing the project buttons
+			$this->addButtonRow(
+				button::make(
+					text: $cost,
+					callback_data: 'set@cost'
+				),
+				button::make(
+					text: '🤠 ' . sprintf($localization->project_create_button_team, count($this->workers), $localization->project_create_peoples),
+					callback_data: 'open@team'
+				)
+			);
 
-				// Writing the project cost per hour button
-				$this->addButtonRow(
-					button::make(
-						text: '🛠 ' . $localization->project_create_button_cost_per_hour,
-						callback_data: 'set@cost'
-					)
-				);
-			}
+
+			// Writing the project cost per hour button
+			$this->addButtonRow(
+				button::make(
+					text: "📦 $localization->project_create_button_request",
+					callback_data: '@request'
+				)
+			);
 		}
 
 		// Updating the message and saving its text
@@ -564,6 +612,89 @@ final class create extends menu
 		$this->start(robot: $robot, new: false);
 	}
 
+	/**
+	 * Team
+	 * 
+	 * Generate the project create team settings menu
+	 *
+	 * @param telegram $robot The robot
+	 *
+	 * @return void
+	 */
+	public function team(telegram $robot): void
+	{
+		// Initializing the account language
+		$language = $robot->get('language') ?? LANGUAGE_DEFAULT;
+
+		// Initializing the account localization
+		$localization = $robot->get('localization') ?? new localization($language);
+
+		// Initializing the project development workers
+		$this->workers ??= $this->architecture?->workers() ?? [];
+
+		// Clearing the message buttons
+		$this->clearButtons();
+
+		// Writing the row into the keyboard
+		$this->addButtonRow(
+			button::make(
+				text: sprintf("🥷🏻 $localization->project_create_team_button_programmers", $this->workers[worker_type::programmer->name] ?? [], $localization->project_create_peoples),
+				callback_data: '@programmers'
+			)
+		);
+
+		// Writing the row into the keyboard
+		$this->addButtonRow(
+			button::make(
+				text: sprintf("👽 $localization->project_create_team_button_designers", $this->workers[worker_type::designer->name] ?? [], $localization->project_create_peoples),
+				callback_data: '@designers'
+			),
+			button::make(
+				text: sprintf("🦹🏻‍♀️ $localization->project_create_team_button_boosters", $this->workers[worker_type::booster->name] ?? [], $localization->project_create_peoples),
+				callback_data: '@boosters'
+			)
+		);
+
+		// Writing the row into the keyboard
+		$this->addButtonRow(
+			button::make(
+				text: "🔏 $localization->project_create_button_back",
+				callback_data: '@continue'
+			)
+		);
+
+		// Title
+		$title = "🤠 $localization->project_create_team_title";
+
+		// Description
+		$description = $localization->project_create_team_description;
+
+		// Warning: cost
+		$warning_cost = '⚠️ ' . $localization->project_create_team_warning_cost;
+
+		// Generating the message text
+		$text = implode(
+			"\n\n",
+			array_filter(
+				[
+					$title,
+					$description,
+					$warning_cost,
+				]
+			)
+		);
+
+		// Updating the message text
+		$this->menuText(
+			text: $text,
+			opt: [
+				'parse_mode' => mode::MARKDOWN
+			]
+		);
+
+		// Updating the message
+		$this->showMenu();
+	}
 
 	/**
 	 * Architectures
@@ -744,7 +875,7 @@ final class create extends menu
 		$this->clearButtons();
 
 		// Sending the process main menu
-		$this->start(robot: $robot, new: false);
+		$this->continue(robot: $robot);
 	}
 
 	/**
@@ -934,7 +1065,7 @@ final class create extends menu
 		$this->clearButtons();
 
 		// Sending the process main menu
-		$this->start(robot: $robot, new: false);
+		$this->continue(robot: $robot);
 	}
 
 	/**
@@ -1060,10 +1191,12 @@ final class create extends menu
 		}
 
 		// Writing the "back" button into the menu
-		$this->addButtonRow(button::make(
-			text: "🔏 $localization->project_create_button_back",
-			callback_data: '@continue'
-		));
+		$this->addButtonRow(
+			button::make(
+				text: "🔏 $localization->project_create_button_back",
+				callback_data: '@continue'
+			)
+		);
 
 		// Deinitializing deprecated variables
 		unset($row, $limit, $length, $generated, $integrations, $integration);
@@ -1184,7 +1317,7 @@ final class create extends menu
 					}
 
 					// Sending the process main menu
-					$this->start(robot: $robot, new: false);
+					$this->continue(robot: $robot);
 				} else {
 					// Not a number
 
@@ -1194,7 +1327,7 @@ final class create extends menu
 							"\n\n",
 							array_filter(
 								[
-									"⚠️ $localization->project_create_request_cost_error_not_a_number",
+									"⚠️ $localization->project_create_cost_error_not_a_number",
 								]
 							)
 						),
@@ -1215,7 +1348,7 @@ final class create extends menu
 						array_filter(
 							[
 								sprintf(
-									"⚠️ $localization->project_create_request_cost_error_distance",
+									"⚠️ $localization->project_create_cost_error_distance",
 									$minimum,
 									$maximum
 								)
@@ -1239,14 +1372,452 @@ final class create extends menu
 						"\n\n",
 						array_filter(
 							[
-								"✏️ *$localization->project_create_request_cost_title*",
-								$localization->project_create_request_cost_description,
+								"✏️ *$localization->project_create_cost_title*",
+								$localization->project_create_cost_description,
 								sprintf(
-									$localization->project_create_request_cost_default,
+									$localization->project_create_cost_default,
 									PROJECT_CREATE_COST_HOUR_DEFAULT,
 									CURRENCY_DEFAULT->symbol() ?? ''
 								),
-								"⚠️ $localization->project_create_request_cost_warning"
+								"⚠️ $localization->project_create_cost_warning"
+							]
+						)
+					),
+					parse_mode: mode::MARKDOWN,
+					disable_notification: true,
+				)
+			];
+
+			// Waiting for the user input
+			$this->next('cost');
+		}
+	}
+
+	/**
+	 * Programmers
+	 * 
+	 * Write the project programmers
+	 *
+	 * @param telegram $robot The robot
+	 *
+	 * @return void
+	 */
+	public function programmers(telegram $robot): void
+	{
+		// Initializing the account language
+		$language = $robot->get('language') ?? LANGUAGE_DEFAULT;
+
+		// Initializing the account localization
+		$localization = $robot->get('localization') ?? new localization($language);
+
+		// Initializing the user input message
+		$message = $robot->message();
+
+		// Initializing the user input message text
+		$text = $message?->text;
+
+		// Initializing the message data
+		$data = $robot->callbackQuery()?->data;
+
+		if (!empty($text) && $data !== 'set') {
+			// Not empty text
+
+			// Initializing the message filters
+			$minimum = 2;
+			$maximum = 5;
+
+			// Writing the user input message into the messages registry
+			$this->messages[] = $message;
+
+			// Initializing the text length
+			$length = mb_strlen($text);
+
+			if ($length >= $minimum) {
+				// More than minimum amount of symbols
+
+				// Sanitizing
+				$float = filter_var($text, FILTER_SANITIZE_NUMBER_FLOAT);
+
+				if (filter_var($float, FILTER_VALIDATE_FLOAT)) {
+					// Number
+
+					// Writing the cost
+					$this->cost = (float) $float;
+
+					try {
+						foreach ($this->messages as $message) {
+							// Iterating over messages registry
+
+							// Deleting the message
+							$message->delete();
+
+							// Waiting just for rofls
+							usleep(200);
+						}
+					} catch (exception $exception) {
+						// Sending into the errors output buffer
+						error_log($exception->getMessage());
+					} finally {
+						// Deinitializing the messages registry
+						$this->messages = [];
+					}
+
+					// Sending the process main menu
+					$this->continue(robot: $robot);
+				} else {
+					// Not a number
+
+					// Sending the message
+					$this->messages[] = $robot->sendMessage(
+						text: implode(
+							"\n\n",
+							array_filter(
+								[
+									"⚠️ $localization->project_create_cost_error_not_a_number",
+								]
+							)
+						),
+						parse_mode: mode::MARKDOWN,
+						disable_notification: true,
+					);
+
+					// Waiting for the user input
+					$this->next('cost');
+				}
+			} else {
+				// Less or equal than minimum amount of symbols
+
+				// Sending the message
+				$this->messages[] = $robot->sendMessage(
+					text: implode(
+						"\n\n",
+						array_filter(
+							[
+								sprintf(
+									"⚠️ $localization->project_create_cost_error_distance",
+									$minimum,
+									$maximum
+								)
+							]
+						)
+					),
+					parse_mode: mode::MARKDOWN,
+					disable_notification: true,
+				);
+
+				// Waiting for the user input
+				$this->next('cost');
+			}
+		} else {
+			// Empty text
+
+			// Sending the message and reinitializing the messages registry
+			$this->messages = [
+				$robot->sendMessage(
+					text: implode(
+						"\n\n",
+						array_filter(
+							[
+								"✏️ *$localization->project_create_cost_title*",
+								$localization->project_create_cost_description,
+								sprintf(
+									$localization->project_create_cost_default,
+									PROJECT_CREATE_COST_HOUR_DEFAULT,
+									CURRENCY_DEFAULT->symbol() ?? ''
+								),
+								"⚠️ $localization->project_create_cost_warning"
+							]
+						)
+					),
+					parse_mode: mode::MARKDOWN,
+					disable_notification: true,
+				)
+			];
+
+			// Waiting for the user input
+			$this->next('cost');
+		}
+	}
+
+	/**
+	 * Designers
+	 * 
+	 * Write the project designers
+	 *
+	 * @param telegram $robot The robot
+	 *
+	 * @return void
+	 */
+	public function designers(telegram $robot): void
+	{
+		// Initializing the account language
+		$language = $robot->get('language') ?? LANGUAGE_DEFAULT;
+
+		// Initializing the account localization
+		$localization = $robot->get('localization') ?? new localization($language);
+
+		// Initializing the user input message
+		$message = $robot->message();
+
+		// Initializing the user input message text
+		$text = $message?->text;
+
+		// Initializing the message data
+		$data = $robot->callbackQuery()?->data;
+
+		if (!empty($text) && $data !== 'set') {
+			// Not empty text
+
+			// Initializing the message filters
+			$minimum = 2;
+			$maximum = 5;
+
+			// Writing the user input message into the messages registry
+			$this->messages[] = $message;
+
+			// Initializing the text length
+			$length = mb_strlen($text);
+
+			if ($length >= $minimum) {
+				// More than minimum amount of symbols
+
+				// Sanitizing
+				$float = filter_var($text, FILTER_SANITIZE_NUMBER_FLOAT);
+
+				if (filter_var($float, FILTER_VALIDATE_FLOAT)) {
+					// Number
+
+					// Writing the cost
+					$this->cost = (float) $float;
+
+					try {
+						foreach ($this->messages as $message) {
+							// Iterating over messages registry
+
+							// Deleting the message
+							$message->delete();
+
+							// Waiting just for rofls
+							usleep(200);
+						}
+					} catch (exception $exception) {
+						// Sending into the errors output buffer
+						error_log($exception->getMessage());
+					} finally {
+						// Deinitializing the messages registry
+						$this->messages = [];
+					}
+
+					// Sending the process main menu
+					$this->continue(robot: $robot);
+				} else {
+					// Not a number
+
+					// Sending the message
+					$this->messages[] = $robot->sendMessage(
+						text: implode(
+							"\n\n",
+							array_filter(
+								[
+									"⚠️ $localization->project_create_cost_error_not_a_number",
+								]
+							)
+						),
+						parse_mode: mode::MARKDOWN,
+						disable_notification: true,
+					);
+
+					// Waiting for the user input
+					$this->next('cost');
+				}
+			} else {
+				// Less or equal than minimum amount of symbols
+
+				// Sending the message
+				$this->messages[] = $robot->sendMessage(
+					text: implode(
+						"\n\n",
+						array_filter(
+							[
+								sprintf(
+									"⚠️ $localization->project_create_cost_error_distance",
+									$minimum,
+									$maximum
+								)
+							]
+						)
+					),
+					parse_mode: mode::MARKDOWN,
+					disable_notification: true,
+				);
+
+				// Waiting for the user input
+				$this->next('cost');
+			}
+		} else {
+			// Empty text
+
+			// Sending the message and reinitializing the messages registry
+			$this->messages = [
+				$robot->sendMessage(
+					text: implode(
+						"\n\n",
+						array_filter(
+							[
+								"✏️ *$localization->project_create_cost_title*",
+								$localization->project_create_cost_description,
+								sprintf(
+									$localization->project_create_cost_default,
+									PROJECT_CREATE_COST_HOUR_DEFAULT,
+									CURRENCY_DEFAULT->symbol() ?? ''
+								),
+								"⚠️ $localization->project_create_cost_warning"
+							]
+						)
+					),
+					parse_mode: mode::MARKDOWN,
+					disable_notification: true,
+				)
+			];
+
+			// Waiting for the user input
+			$this->next('cost');
+		}
+	}
+
+	/**
+	 * Boosters
+	 * 
+	 * Write the project boosters
+	 *
+	 * @param telegram $robot The robot
+	 *
+	 * @return void
+	 */
+	public function boosters(telegram $robot): void
+	{
+		// Initializing the account language
+		$language = $robot->get('language') ?? LANGUAGE_DEFAULT;
+
+		// Initializing the account localization
+		$localization = $robot->get('localization') ?? new localization($language);
+
+		// Initializing the user input message
+		$message = $robot->message();
+
+		// Initializing the user input message text
+		$text = $message?->text;
+
+		// Initializing the message data
+		$data = $robot->callbackQuery()?->data;
+
+		if (!empty($text) && $data !== 'set') {
+			// Not empty text
+
+			// Initializing the message filters
+			$minimum = 2;
+			$maximum = 5;
+
+			// Writing the user input message into the messages registry
+			$this->messages[] = $message;
+
+			// Initializing the text length
+			$length = mb_strlen($text);
+
+			if ($length >= $minimum) {
+				// More than minimum amount of symbols
+
+				// Sanitizing
+				$float = filter_var($text, FILTER_SANITIZE_NUMBER_FLOAT);
+
+				if (filter_var($float, FILTER_VALIDATE_FLOAT)) {
+					// Number
+
+					// Writing the cost
+					$this->cost = (float) $float;
+
+					try {
+						foreach ($this->messages as $message) {
+							// Iterating over messages registry
+
+							// Deleting the message
+							$message->delete();
+
+							// Waiting just for rofls
+							usleep(200);
+						}
+					} catch (exception $exception) {
+						// Sending into the errors output buffer
+						error_log($exception->getMessage());
+					} finally {
+						// Deinitializing the messages registry
+						$this->messages = [];
+					}
+
+					// Sending the process main menu
+					$this->continue(robot: $robot);
+				} else {
+					// Not a number
+
+					// Sending the message
+					$this->messages[] = $robot->sendMessage(
+						text: implode(
+							"\n\n",
+							array_filter(
+								[
+									"⚠️ $localization->project_create_cost_error_not_a_number",
+								]
+							)
+						),
+						parse_mode: mode::MARKDOWN,
+						disable_notification: true,
+					);
+
+					// Waiting for the user input
+					$this->next('cost');
+				}
+			} else {
+				// Less or equal than minimum amount of symbols
+
+				// Sending the message
+				$this->messages[] = $robot->sendMessage(
+					text: implode(
+						"\n\n",
+						array_filter(
+							[
+								sprintf(
+									"⚠️ $localization->project_create_cost_error_distance",
+									$minimum,
+									$maximum
+								)
+							]
+						)
+					),
+					parse_mode: mode::MARKDOWN,
+					disable_notification: true,
+				);
+
+				// Waiting for the user input
+				$this->next('cost');
+			}
+		} else {
+			// Empty text
+
+			// Sending the message and reinitializing the messages registry
+			$this->messages = [
+				$robot->sendMessage(
+					text: implode(
+						"\n\n",
+						array_filter(
+							[
+								"✏️ *$localization->project_create_cost_title*",
+								$localization->project_create_cost_description,
+								sprintf(
+									$localization->project_create_cost_default,
+									PROJECT_CREATE_COST_HOUR_DEFAULT,
+									CURRENCY_DEFAULT->symbol() ?? ''
+								),
+								"⚠️ $localization->project_create_cost_warning"
 							]
 						)
 					),
@@ -1283,7 +1854,7 @@ final class create extends menu
 			// Initializing the project purpose
 			$this->purpose = $purposes[0];
 		} else if (isset($this->purpose) && array_search($this->purpose, $purposes) !== false) {
-			// The project architrcture purpose is the same from deprecated purpose
+			// The project architecture purpose is the same from deprecated purpose
 
 			// keep it
 		} else {
@@ -1410,10 +1981,16 @@ final class create extends menu
 		// Initializing the receivers registry
 		$receivers = PROJECT_CREATE_REQUEST_RECEIVERS;
 
-		// Initializing project data
+		// Architecture
 		$architecture = unmarkdown($this->architecture?->label(language: $language) ?? $localization->project_request_empty);
+
+		// Purpose
 		$purpose = unmarkdown(isset($this->purpose) ? $this->purpose->label(language: $language) : $localization->project_request_empty);
+
+		// Hours
 		$hours = $this->hours();
+
+		// P
 
 		// Generating the message text
 		$text = implode(

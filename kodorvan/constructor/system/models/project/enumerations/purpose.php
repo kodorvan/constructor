@@ -31,7 +31,7 @@ enum purpose
 	/* case charity; */
 	case search;
 	case calculate;
-	/* case logic; */
+	case logic;
 	case game;
 
 	/* case workers;
@@ -121,7 +121,7 @@ enum purpose
 			}, */
 			static::special => match ($language) {
 				language::en => 'Special',
-				language::ru => 'Особенный'
+				language::ru => 'Особенное'
 			}
 		};
 	}

@@ -6,7 +6,8 @@ namespace kodorvan\constructor\models\project\enumerations;
 
 // Files of the project
 use kodorvan\constructor\models\project\enumerations\purpose,
-	kodorvan\constructor\models\project\enumerations\integration;
+	kodorvan\constructor\models\project\enumerations\integration,
+	kodorvan\constructor\models\worker\enumerations\type as worker_type;
 
 // The library for languages support
 use mirzaev\languages\language;
@@ -83,11 +84,11 @@ enum architecture
 	{
 		// Exit (success)
 		return match ($this) {
-			static::chat_robot => 1,
+			static::chat_robot => 2,
 			static::parser => 1,
 			static::script => 1,
-			static::site => 1,
-			static::program => 1,
+			static::site => 2,
+			static::program => 2,
 			static::complex => 4,
 			default => 1
 		};
@@ -147,44 +148,6 @@ enum architecture
 	}
 
 	/**
-	 * Integrations
-	 *
-	 * @return array Integrations
-	 */
-	/* public function integrations(): array
-	{
-		// Exit (success)
-		return match ($this) {
-			static::chat_robot => [
-				integration::one_c,
-				integration::moy_sklad
-			],
-			static::parser => [
-				integration::one_c,
-				integration::moy_sklad
-			],
-			static::script => [],
-			static::crm => [
-				integration::one_c,
-				integration::moy_sklad
-			],
-			static::site => [
-				integration::one_c,
-				integration::moy_sklad
-			],
-			static::program => [
-				integration::one_c,
-				integration::moy_sklad
-			],
-			static::complex => [
-				integration::one_c,
-				integration::moy_sklad
-			],
-			default => []
-		};
-	} */
-
-	/**
 	 * Cost
 	 *
 	 * @return int|float The minimal cost of the project development
@@ -238,6 +201,43 @@ enum architecture
 			static::program => 4,
 			static::complex => 5,
 			default => 5
+		};
+	}
+
+	/**
+	 * Workers
+	 *
+	 * @return array Workers
+	 */
+	public function workers(): array
+	{
+		// Exit (success)
+		return match ($this) {
+			static::chat_robot => [
+				worker_type::programmer->name => 1,
+				worker_type::booster->name => 1
+			],
+			static::parser => [
+				worker_type::programmer->name => 1
+			],
+			static::script => [
+				worker_type::programmer->name => 1
+			],
+			static::site => [
+				worker_type::programmer->name => 1,
+				worker_type::designer->name => 1,
+				worker_type::booster->name => 1
+			],
+			static::program => [
+				worker_type::programmer->name => 1,
+				worker_type::designer->name => 1
+			],
+			static::complex => [
+				worker_type::programmer->name => 1
+			],
+			default => [
+				worker_type::programmer->name => 1
+			]
 		};
 	}
 }
