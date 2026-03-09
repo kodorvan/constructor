@@ -10,7 +10,7 @@ use kodorvan\constructor\models\core,
 	kodorvan\constructor\models\settings,
 	kodorvan\constructor\models\worker,
 	kodorvan\constructor\models\project,
-	kodorvan\constructor\models\project\enumerations\type as project_type,
+	kodorvan\constructor\models\project\enumerations\architecture as project_architecture,
 	kodorvan\constructor\models\project\enumerations\status as project_status;
 
 // The library for languages support
@@ -150,7 +150,7 @@ final class account extends core implements record_interface
 					// Writing the updated record into the account object
 					$this->record = $updated;
 
-					// Deserializing parameters
+					// Deserializing the record
 					$this->deserialize();
 
 					// Exit (success)
@@ -166,7 +166,7 @@ final class account extends core implements record_interface
 			// Writing the found record into the account object
 			$this->record = $account;
 
-			// Deserializing parameters
+			// Deserializing the record
 			$this->deserialize();
 
 			// Exit (success)
@@ -374,6 +374,9 @@ final class account extends core implements record_interface
 		if ($authorizations instanceof authorizations) {
 			// Found the account authorizations
 
+			// Deserializing the record
+			$authorizations->deserialize();
+
 			// Exit (success)
 			return $authorizations;
 		}
@@ -396,6 +399,9 @@ final class account extends core implements record_interface
 
 		if ($worker instanceof worker) {
 			// Found the account worker
+
+			// Deserializing the record
+			$worker->deserialize();
 
 			// Exit (success)
 			return $worker;
@@ -420,6 +426,9 @@ final class account extends core implements record_interface
 		if ($settings instanceof settings) {
 			// Found the account settings
 
+			// Deserializing the record
+			$settings->deserialize();
+
 			// Exit (success)
 			return $settings;
 		}
@@ -433,23 +442,23 @@ final class account extends core implements record_interface
 	 *
 	 * Search for the account projects
 	 *
-	 * @param project_type|null $type Type of the project
+	 * @param project_architecture|null $architecture architecture of the project
 	 * @param project_status|null $status Status of the project
 	 * @param int $amount Maximum amount
 	 *
 	 * @return array The account projects
 	 */
 	public function projects(
-		?project_type $type = null,
+		?project_architecture $architecture = null,
 		?project_status $status = null,
-		int $amount = 20
+		int $amount = 1000
 	): array {
 		// Search for the account projects 
 		$projects = new project()->database->read(
 			filter: fn(record $record) =>
 			$record->active === 1
 				&& $record->account === $this->identifier
-				&& ($type === null || $record->type === $type->name)
+				&& ($architecture === null || $record->architecture === $architecture->name)
 				&& ($status === null || $record->status === $status->name),
 			amount: $amount
 		);
@@ -475,7 +484,7 @@ final class account extends core implements record_interface
 				filter: fn(record $record) =>
 				$record->active === 1
 					&& match (project_status::{$record->status}) {
-						project_status::developing, project_status::developed, project_status::launched => true,
+						project_status::developing, project_status::launched => true,
 						default => false
 					},
 				amount: $amount

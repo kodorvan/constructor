@@ -19,14 +19,14 @@ use InvalidArgumentException as exception_argument,
  * @license http://www.wtfpl.net/ Do What The Fuck You Want To Public License
  * @author Arsen Mirzaev Tatyano-Muradovich <arsen@mirzaev.sexy>
  */
-enum integration
+enum integration: int
 {
-	case one_c;
-	case bitrix24;
-	case moy_sklad;
-	case telegram;
-	case mail;
-	case excel;
+	case one_c = 0b000001;
+	case bitrix24 = 0b000010;
+	case moy_sklad = 0b000100;
+	case telegram = 0b001000;
+	case mail = 0b010000;
+	case excel = 0b100000;
 
 	/**
 	 * Label
@@ -95,5 +95,55 @@ enum integration
 			static::excel => 1.5,
 			default => 2
 		};
+	}
+
+	/**
+	 * Decode
+	 *
+	 * @param int $bitmask The encoded cases
+	 *
+	 * @return array Decoded cases
+	 */
+	public static function decode(int $bitmask): array
+	{
+		// Initializing the registry of decoded cases
+		$decoded = [];
+
+		foreach (static::cases() as $case) {
+			// Iterating over cases
+
+			if ($bitmask & $case->value) {
+				// Decoded the case
+
+				// Decoding the case and writing into the registry of decoded cases
+				$decoded[] = $case;
+			}
+		}
+
+		// Exit (success)
+		return $decoded;
+	}
+
+	/**
+	 * Encode
+	 *
+	 * @param array $cases The decoded cases
+	 *
+	 * @return int Encoded cases bitmask
+	 */
+	public static function encode(array $cases):int 
+	{
+		// Initializing the registry of encoded cases
+		$encoded = 0b000000;
+
+		foreach ($cases as $case) {
+			// Iterating over cases
+
+			// Encoding the case and writing into the registry of encoded cases
+			$encoded |= $case->value;
+		}
+
+		// Exit (success)
+		return $encoded;
 	}
 }

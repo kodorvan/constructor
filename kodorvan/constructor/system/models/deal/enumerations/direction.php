@@ -2,25 +2,22 @@
 
 declare(strict_types=1);
 
-namespace kodorvan\constructor\models\project\enumerations;
+namespace kodorvan\constructor\models\deal\enumerations;
 
 // Built-in libraries
 use InvalidArgumentException as exception_argument,
 	DomainException as exception_domain;
 
 /**
- * Status
+ * Direction
  *
- * @package kodorvan\neurobot\models\project\enumerations
+ * @package kodorvan\neurobot\models\deal\enumerations
  *
  * @license http://www.wtfpl.net/ Do What The Fuck You Want To Public License
  * @author Arsen Mirzaev Tatyano-Muradovich <arsen@mirzaev.sexy>
  */
-enum status
+enum direction: int
 {
-	case creating;
-	case requested;
-	case invoiced;
-	case developing;
-	case launched;
+	case inbound = 0;
+	case outbound = 1;
 }

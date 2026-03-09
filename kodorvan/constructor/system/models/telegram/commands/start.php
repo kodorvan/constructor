@@ -82,10 +82,6 @@ final class start extends command
 		// Initializing the account
 		$account = $robot->get('account');
 
-		// Initializing the message last update text
-		exec(command: 'git log --oneline $(git describe --tags --abbrev=0 @^ --always)..@ -1 --format="%at" | xargs -I{} date -d @{} "+%Y.%m.%d %H:%M"', output: $git);
-		$update = empty($git[0]) ? '' : "🔏 *$localization->menu_update:* " . unmarkdown($git[0]);
-
 		// Calculating amount of projects
 		$projects = count($account->projects());
 
@@ -115,14 +111,42 @@ final class start extends command
 			)
 		);
 
+		// Title
+		$title = "📋 *$localization->menu_title*";
+
+		// Declaring the message variables
+		$welcome = $cooperation = null;
+
+		if ($projects > 0) {
+			// The account have projects
+
+			// Welcome
+			$welcome = "🤟 *$localization->menu_description_partner*";
+
+			// Cooperation
+			$cooperation = $localization->menu_cooperation;
+		} else {
+			// The account have not projects
+
+			// Welcome
+			$welcome = $localization->menu_description_guest;
+		}
+
+		// Update
+		/* exec(command: 'git log --oneline $(git describe --tags --abbrev=0 @^ --always)..@ -1 --format="%at" | xargs -I{} date -d @{} "+%Y\.%m\.%d %H:%M"', output: $git); // Formatted */
+		exec(command: 'git log --oneline $(git describe --tags --abbrev=0 @^ --always)..@ -1 --format="%at"', output: $git);
+		$update = empty($git[0]) ? '' : "🔏 *$localization->menu_update:* ![" . $git[0] . '](tg://time?unix=' . $git[0] . '&format=r)';
+
+		// Sending the message
 		$robot->sendMessage(
 			text: implode(
 				"\n\n",
-				[
-					"📋 *$localization->menu_title*",
-					$projects > 0 ? printf($localization->menu_description_partner, $partners) : $localization->menu_description_guest,
+				array_filter([
+					$title,
+					$welcome,
+					$cooperation,
 					$update
-				]
+				])
 			),
 			parse_mode: mode::MARKDOWN,
 			disable_notification: true,

@@ -95,10 +95,10 @@ enum purpose
 				language::en => 'Calculate',
 				language::ru => 'Расчёты'
 			},
-			/* static::logic => match ($language) {
+			static::logic => match ($language) {
 				language::en => 'Logic',
 				language::ru => 'Логика'
-			}, */
+			},
 			static::game => match ($language) {
 				language::en => 'Game',
 				language::ru => 'Игра'
